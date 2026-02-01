@@ -65,7 +65,9 @@ Users can explore freely as guests and upgrade seamlessly — without losing dat
 ### 🎞 Movie Details
 
 **Goal:** Act as a **single source of truth** for each movie.
+
 ![Movie Details](./src/public/Screen/MovieDetailPage-desk.png)
+
 ![Movie Details](./src/public/Screen/MovieDetailPage-mob.png)
 
 **Features:**
@@ -80,6 +82,7 @@ Users can explore freely as guests and upgrade seamlessly — without losing dat
 ### 📚 My Library
 
 **Goal:** Personal movie curation space.
+
 ![My Library](./src/public/Screen/MyLibrary-desk.png)
 
 **Features:**
@@ -93,6 +96,7 @@ Users can explore freely as guests and upgrade seamlessly — without losing dat
 ### 🎭 Onboarding – Vibe Picker
 
 **Goal:** Prime the recommendation engine.
+
 ![Onboarding – Vibe Picker](./src/public/Screen/OnboardingVibePicker-desk.png)
 
 **Features:**
@@ -106,8 +110,10 @@ Users can explore freely as guests and upgrade seamlessly — without losing dat
 ### 👤 Profile & Settings
 
 **Goal:** User control and transparency.
-![ Profile & Settings](./src/public/Screen/OnboardingVibePicker-desk.png)
-![ Profile & Settings](./src/public/Screen/OnboardingVibePicker-mob.png)
+
+![ Profile & Settings](./src/public/Screen/ProfileSettings-desk.png)
+
+![ Profile & Settings](./src/public/Screen/ProfileSettings-mob.png)
 
 **Features:**
 
@@ -117,11 +123,13 @@ Users can explore freely as guests and upgrade seamlessly — without losing dat
 
 ---
 
-### 🔐 Authentication (Screen 7)
+### 🔐 Authentication
 
 **Goal:** Seamless conversion from guest to member.
-![👤 Profile & Settings](./src/public/Screen/SignUpGateway-desk.png)
-![👤 Profile & Settings](./src/public/Screen/CinemaGateway-desk.png)
+
+![ Profile & Settings](./src/public/Screen/SignUpGateway-desk.png)
+
+![ Profile & Settings](./src/public/Screen/CinemaGateway-desk.png)
 
 **Features:**
 
