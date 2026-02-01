@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@theme {
+
+    /* Cinema Dark Mode Palette */
+    --color-cinema-black: #080808;
+    --color-netflix-red: #E50914;
+    --color-surface-grey: #1A1A1A;
+    --color-electric-cyan: #00DFD8;
+    --color-metadata-grey: #A3A3A3;
+
+    --font-sans: "Inter", ui-sans-serif, system-ui;
+    --font-bebas: "Bebas Neue", sans-serif;
+
+
+    --background-image-cinema-gradient: radial-gradient(circle at center, #1A1A1A 0%, #080808 100%);
+}
+
+@layer base {
+    body {
+        @apply bg-cinema-black text-white antialiased;
+    }
+}
