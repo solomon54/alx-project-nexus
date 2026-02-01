@@ -45,7 +45,7 @@ Users can explore freely as guests and upgrade seamlessly — without losing dat
 - Hidden Gems discovery
 - Quick Mood Filter FAB
 
-![Home Dashboard](./PWAHomeDashboard.png)
+![Home Dashboard](/PWAHomeDashboard.png)
 
 ---
 
