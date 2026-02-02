@@ -1,7 +1,7 @@
-export default function Home() {
-  return (
-    <div className="bg-cinema-black text-9xl text-netflix-red p-6">
-      Tailwind tokens working 🎬
-    </div>
-  );
+// src/app/page.tsx
+
+import HomeSection from "@/components/home/HomeSection";
+
+export default function HomePage() {
+  return <HomeSection />;
 }
