@@ -8,45 +8,54 @@ import { Movie } from "@/types/movie"; // Real type!
 // Temporary mock data (remove when Engine hook is ready)
 const mockMovies: Movie[] = [
   {
-    id: 1,
+    id: 693134,
     title: "Dune: Part Two",
-    overview: "Paul Atreides unites with Chani...",
-    poster_path: "/poster-dune.jpg", // Replace with real TMDB path later
-    backdrop_path: "/backdrop-dune.jpg",
-    release_date: "2024-03-01",
-    vote_average: 8.5,
-    vote_count: 4500,
-    popularity: 1200,
-    genres: [{ id: 878, name: "Science Fiction" }],
+    overview: "Follow the mythic journey of Paul Atreides...",
+    poster_path: "/kCGlIMHnOm8JPXq3rXM6c5wMSoL.jpg",
+    backdrop_path: "/zGoZB4CboMzY1z4G3nU6BWnMDB2.jpg",
+    release_date: "2024-02-28",
+    vote_average: 8.3,
+    vote_count: 3200,
+    popularity: 1500,
+    genres: [
+      { id: 878, name: "Science Fiction" },
+      { id: 12, name: "Adventure" },
+    ],
     adult: false,
   },
   {
-    id: 2,
+    id: 872585,
     title: "Oppenheimer",
-    overview: "The story of the man behind the atomic bomb...",
-    poster_path: "/poster-oppenheimer.jpg",
-    backdrop_path: "/backdrop-oppenheimer.jpg",
-    release_date: "2023-07-21",
-    vote_average: 8.4,
-    vote_count: 6200,
-    popularity: 980,
-    genres: [{ id: 18, name: "Drama" }],
+    overview: "The story of American scientist J. Robert Oppenheimer...",
+    poster_path: "/kCGlIMHnOm8JPXq3rXM6c5wMSoL.jpg",
+    backdrop_path: "/zGoZB4CboMzY1z4G3nU6BWnMDB2.jpg",
+    release_date: "2023-07-19",
+    vote_average: 8.1,
+    vote_count: 7800,
+    popularity: 900,
+    genres: [
+      { id: 18, name: "Drama" },
+      { id: 36, name: "History" },
+    ],
     adult: false,
   },
   {
-    id: 3,
+    id: 792307,
     title: "Poor Things",
-    overview: "A young woman embarks on a wild adventure...",
-    poster_path: "/poster-poor-things.jpg",
-    backdrop_path: "/backdrop-poor-things.jpg",
-    release_date: "2023-12-08",
-    vote_average: 7.9,
-    vote_count: 2800,
-    popularity: 750,
-    genres: [{ id: 35, name: "Comedy" }],
+    overview:
+      "Brought back to life by the brilliant and unorthodox scientist...",
+    poster_path: "/kCGlIMHnOm8JPXq3rXM6c5wMSoL.jpg",
+    backdrop_path: "/zGoZB4CboMzY1z4G3nU6BWnMDB2.jpg",
+    release_date: "2023-12-07",
+    vote_average: 7.8,
+    vote_count: 3800,
+    popularity: 600,
+    genres: [
+      { id: 35, name: "Comedy" },
+      { id: 878, name: "Science Fiction" },
+    ],
     adult: true,
   },
-  // Add 5-10 more mocks if you want fuller rows
 ];
 
 export default function HomeSection() {
@@ -66,12 +75,6 @@ export default function HomeSection() {
   return (
     <main className="min-h-screen bg-cinema-black text-white relative">
       <HomeHeader />
-
-      {isGuest && (
-        <div className="bg-surface-grey text-metadata-grey text-center py-3 text-sm sticky top-0 z-40">
-          Continue as guest · Login to sync your library forever
-        </div>
-      )}
 
       <HeroSection movies={heroMovies} />
 

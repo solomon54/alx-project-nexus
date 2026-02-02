@@ -39,11 +39,11 @@ export default function MovieCard({
 
   // Fallback poster if missing or placeholder
   const posterSrc = isPlaceholder
-    ? "/placeholder-poster.jpg" // Add a real fallback image in /public later
+    ? "/fallback-poster.png" // ← your root-level file
     : movie.poster_path
     ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-    : "/fallback-poster.png"; // Dark placeholder
-
+    : "/fallback-poster.png";
+  // And blurDataURL="/low-res-poster-placeholder.jpg" if you have it
   return (
     <motion.div
       className={cn(
