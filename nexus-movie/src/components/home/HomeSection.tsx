@@ -3,9 +3,9 @@ import HomeHeader from "./HomeHeader";
 import HeroSection from "./HeroSection";
 import MovieRow from "./MovieRow";
 import FloatingMoodButton from "./FloatingMoodButton";
-import { Movie } from "@/types/movie"; // Real type!
+import { Movie } from "@/types/movie";
 
-// Temporary mock data (remove when Engine hook is ready)
+// Temporary mock data
 const mockMovies: Movie[] = [
   {
     id: 872585,
@@ -67,18 +67,16 @@ const mockMovies: Movie[] = [
 ];
 
 export default function HomeSection() {
-  // Simple stubs (move to contexts/logic later)
-  const dismissedIds: number[] = []; // Blacklist
-  const isGuest = true; // From AuthContext later
+  const dismissedIds: number[] = [];
+  const isGuest = true;
 
-  // Filter dismissed (stub logic)
   const filteredMovies = mockMovies.filter((m) => !dismissedIds.includes(m.id));
 
   // Derive rows (simple slice for now)
-  const heroMovies = filteredMovies.slice(0, 3); // Just the 1st movie
-  const hiddenGems = filteredMovies.slice(0, 3); // All 3 movies
-  const vibeMovies = filteredMovies.slice(1, 3); // The 2nd and 3rd movies
-  const continueWatching = filteredMovies.slice(0, 2); // The 1st and 2nd movies
+  const heroMovies = filteredMovies.slice(0, 3);
+  const hiddenGems = filteredMovies.slice(0, 3);
+  const vibeMovies = filteredMovies.slice(1, 3);
+  const continueWatching = filteredMovies.slice(0, 2);
   // const continueWatching: Movie[] = []; // Empty for now
 
   return (

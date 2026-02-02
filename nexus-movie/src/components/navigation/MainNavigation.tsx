@@ -9,7 +9,7 @@ import { cn } from "@/utils/classNames";
 
 const footerTab = [
   { name: "Home", href: "/", icon: Home },
-  { name: "Explore", href: "/explore", icon: Search },
+  { name: "Explore", href: "/search", icon: Search },
   { name: "My Library", href: "/library", icon: Bookmark },
   { name: "Profile", href: "/profile", icon: User },
 ];
