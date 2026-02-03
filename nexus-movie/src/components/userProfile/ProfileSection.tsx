@@ -1,0 +1,58 @@
+"use client";
+
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import ProfileTabs from "./ProfileTabs";
+import ProfilePanel from "./ProfilePanel";
+import AccountPanel from "./AccountPanel";
+import PreferencesPanel from "./PreferencesPanel";
+import { cn } from "@/utils/classNames";
+
+type SettingsTab = "profile" | "account" | "preferences";
+
+export default function ProfileSection() {
+  const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
+
+  return (
+    <div className="max-w-4xl mx-auto px-4 pt-6 md:pt-16 pb-24">
+      <header className="mb-8 md:mb-12 md:text-center">
+        <h1 className="text-3xl md:text-6xl font-bebas tracking-wider uppercase text-white">
+          Settings
+        </h1>
+        <p className="text-xs md:text-base text-zinc-500 mt-2">
+          Manage your cinematic identity and preferences.
+        </p>
+      </header>
+
+      {/* Tabs: spans full width under the header */}
+      <div className="sticky top-0 z-20 bg-black/80 backdrop-blur-md md:static md:bg-transparent mb-8 md:mb-12">
+        <div className="max-w-2xl mx-auto">
+          {" "}
+          <ProfileTabs active={activeTab} onChange={setActiveTab} />
+        </div>
+      </div>
+
+      {/* Main Content Area*/}
+      <main className="max-w-2xl mx-auto w-full">
+        <div
+          className={cn(
+            "transition-all duration-300",
+            "bg-transparent md:bg-zinc-900/30 md:border md:border-white/10 md:rounded-[2.5rem] md:p-10 md:backdrop-blur-md"
+          )}>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}>
+              {activeTab === "profile" && <ProfilePanel />}
+              {activeTab === "account" && <AccountPanel />}
+              {activeTab === "preferences" && <PreferencesPanel />}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </main>
+    </div>
+  );
+}
