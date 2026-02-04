@@ -15,7 +15,7 @@ export default function HomeHeader({ query, setQuery }: HomeHeaderProps) {
     <header
       className={cn(
         "sticky top-0 z-50 bg-cinema-black/80 backdrop-blur-md border-b border-surface-grey/50",
-        "px-4 py-3 md:px-6 lg:px-8"
+        "px-4 py-3 md:px-6 lg:px-0"
       )}>
       <div className="mx-auto flex items-center justify-between gap-4 md:gap-6 lg:gap-8 max-w-7xl">
         {/* Logo */}
