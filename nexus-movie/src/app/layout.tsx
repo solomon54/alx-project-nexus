@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../styles/globals.css";
 import FooterTab from "@/components/navigation/MainNavigation";
+import Providers from "./providers"; // ✅ ADD
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,15 +21,16 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
       <body className="bg-black text-white">
-        <FooterTab />
-
-        <main className="sm:ml-20 lg:ml-64 pb-24 sm:pb-0">{children}</main>
+        <Providers>
+          <FooterTab />
+          <main className="sm:ml-20 lg:ml-64 pb-24 sm:pb-0">{children}</main>
+        </Providers>
       </body>
     </html>
   );
