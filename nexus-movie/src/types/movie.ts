@@ -22,6 +22,7 @@ export interface Provider {
 
 // Core TMDB
 export interface Movie {
+  isHiddenGem: unknown;
   id: number;
   title: string;
   original_title?: string;
