@@ -4,8 +4,14 @@ import React, { useState } from "react";
 import { Sparkles, X, Flame, Coffee, Ghost, Zap, Heart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/utils/classNames";
+import { DiscoveryMood } from "@/features/movie-discovery/movie-discovery.types";
 
-const moods = [
+const moods: {
+  id: DiscoveryMood;
+  label: string;
+  icon: React.ElementType;
+  color: string;
+}[] = [
   { id: "gritty", label: "Gritty", icon: Zap, color: "hover:bg-orange-500" },
   { id: "epic", label: "Epic", icon: Flame, color: "hover:bg-red-500" },
   {
@@ -15,15 +21,25 @@ const moods = [
     color: "hover:bg-green-500",
   },
   { id: "spooky", label: "Horror", icon: Ghost, color: "hover:bg-purple-500" },
-  { id: "romance", label: "Romantic", icon: Heart, color: "hover:bg-pink-500" },
+  {
+    id: "romantic",
+    label: "Romantic",
+    icon: Heart,
+    color: "hover:bg-pink-500",
+  },
 ];
 
-const FloatingMoodButton: React.FC = () => {
+interface FloatingMoodButtonProps {
+  onMoodSelect: (mood: DiscoveryMood) => void;
+}
+
+const FloatingMoodButton: React.FC<FloatingMoodButtonProps> = ({
+  onMoodSelect,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div className="fixed bottom-24 right-6 z-50 sm:bottom-10 sm:right-10 flex flex-col items-end">
-      {/* Mood Selection Menu */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -43,7 +59,7 @@ const FloatingMoodButton: React.FC = () => {
                   "hover:text-black group"
                 )}
                 onClick={() => {
-                  console.log(`Filtering by: ${mood.id}`);
+                  onMoodSelect(mood.id);
                   setIsOpen(false);
                 }}>
                 <span className="text-sm font-medium">{mood.label}</span>
@@ -57,7 +73,6 @@ const FloatingMoodButton: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* Main Toggle Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Open mood picker"
