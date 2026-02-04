@@ -20,7 +20,7 @@ export interface Provider {
   monetization_type?: "flatrate" | "rent" | "buy" | "free" | "ads";
 }
 
-// Core TMDB (from /movie/{id} or /discover)
+// Core TMDB
 export interface Movie {
   id: number;
   title: string;
@@ -42,21 +42,33 @@ export interface Movie {
   // Trailer / video
   video?: boolean;
   trailer_key?: string;
-  // App-derived (Engine / Logic modules)
+  credits: {
+    cast: {
+      id: number;
+      name: string;
+      character: string;
+      profile_path: string;
+    }[];
+
+    crew: { id: number; name: string; job: string }[];
+  };
+
+  // App-derived
   moods?: string[];
   providers?: Provider[];
   hidden_gem_score?: number;
 
-  // User state (from PreferencesContext / Persistence)
+  // User state
   is_watchlisted?: boolean;
   is_dismissed?: boolean;
 
-  // Optional extras (details page)
+  // Optional extras
   budget?: number;
   revenue?: number;
   homepage?: string;
   imdb_id?: string;
   production_companies?: ProductionCompany[];
+  production_countries: { iso_3166_1: string; name: string }[];
 }
 
 // Paginated list response (discover/trending/search)
@@ -67,7 +79,7 @@ export interface MovieListResponse {
   total_results: number;
 }
 
-// For loading / skeletons (MovieCardSkeleton etc.)
+// For loading / skeletons
 export type MoviePlaceholder = Partial<Movie> & {
   id: string | number;
   isPlaceholder: true;
