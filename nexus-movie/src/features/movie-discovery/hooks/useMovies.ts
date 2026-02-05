@@ -3,31 +3,38 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { mockMovies } from "@/lib/mockdata";
+import { Movie } from "@/types/movie";
 import { calculateMoodMatch } from "../logic/moodFilter.logic";
 import { calculateHiddenGemScore } from "../logic/hiddenGems.logic";
 import { DiscoveryMood } from "../movie-discovery.types";
+
+type DiscoverMovie = Movie & {
+  moodScore?: number;
+};
 
 export const useDiscoverMovies = (mood?: DiscoveryMood) => {
   return useQuery({
     queryKey: ["discover", mood],
 
     queryFn: async () => {
-      // Simulate network delay
       await new Promise((r) => setTimeout(r, 800));
 
-      let results = mockMovies;
+      let results: DiscoverMovie[] = mockMovies.map((movie) => ({
+        ...movie,
+      }));
 
       if (mood) {
         results = results
-          .map((movie) => ({
-            ...movie,
-            moodScore: calculateMoodMatch(movie, mood).score,
-          }))
-          .filter((m) => (m as any).moodScore >= 40)
-          .sort((a, b) => (b as any).moodScore - (a as any).moodScore);
+          .map((movie) => {
+            const { score } = calculateMoodMatch(movie, mood);
+            return { ...movie, moodScore: score };
+          })
+          .filter(
+            (movie) => movie.moodScore !== undefined && movie.moodScore >= 40
+          )
+          .sort((a, b) => (b.moodScore ?? 0) - (a.moodScore ?? 0));
       }
 
-      // Add hidden gem flag
       results = results.map((movie) => ({
         ...movie,
         isHiddenGem: calculateHiddenGemScore(movie).isHiddenGem,
@@ -41,14 +48,9 @@ export const useDiscoverMovies = (mood?: DiscoveryMood) => {
       };
     },
 
-    // ────────────────────────────────────────
-    //  v5 replacement for keepPreviousData: true
-    // ────────────────────────────────────────
     placeholderData: (previousData) => previousData,
-
-    // Good defaults for your use-case
-    staleTime: 1000 * 60 * 10, // 10 minutes – data stays fresh
-    gcTime: 1000 * 60 * 30, // 30 minutes before garbage collection
-    refetchOnWindowFocus: false, // usually better UX in movie apps
+    staleTime: 1000 * 60 * 10,
+    gcTime: 1000 * 60 * 30,
+    refetchOnWindowFocus: false,
   });
 };
