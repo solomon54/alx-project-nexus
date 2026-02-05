@@ -1,25 +1,24 @@
-import { Movie, Provider } from "@/types/movie";
+//src/features/movie-discovery/logic/movieDecision.logic.ts
+import { Movie } from "@/types/movie";
 
-export interface MovieDecision {
-  primaryProvider?: Provider;
-  canWatchNow: boolean;
-  canAddToWatchlist: boolean;
-  canDismiss: boolean;
-  isHiddenGem: boolean;
-}
+export type MovieDecision = "neutral" | "watchlist" | "dismissed";
 
-export function decideMovie(movie: Movie): MovieDecision {
-  const primaryProvider =
-    movie.providers?.find((p) => p.monetization_type === "flatrate") ??
-    movie.providers?.[0];
+export type DecidedMovie = Movie & {
+  is_watchlisted?: boolean;
+  is_dismissed?: boolean;
+  decision: MovieDecision;
+};
 
-  const isHiddenGem = movie.hidden_gem_score > 0.75 && movie.vote_count > 500;
+export function decideMovie<
+  T extends Movie & { is_watchlisted?: boolean; is_dismissed?: boolean }
+>(movie: T): DecidedMovie {
+  if (movie.is_dismissed) {
+    return { ...movie, decision: "dismissed" };
+  }
 
-  return {
-    primaryProvider,
-    canWatchNow: Boolean(primaryProvider?.deep_link),
-    canAddToWatchlist: !movie.is_watchlisted,
-    canDismiss: !movie.is_dismissed,
-    isHiddenGem,
-  };
+  if (movie.is_watchlisted) {
+    return { ...movie, decision: "watchlist" };
+  }
+
+  return { ...movie, decision: "neutral" };
 }
