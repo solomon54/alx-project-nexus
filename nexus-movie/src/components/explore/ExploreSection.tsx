@@ -1,123 +1,139 @@
-// src/components/home/ExploreSection.tsx
+// src/components/explore/ExploreSection.tsx
 "use client";
 
 import { useState } from "react";
-import { Movie } from "@/types/movie";
+import { useFilteredMovies } from "@/features/movie-discovery/hooks/useFilteredMovies";
 import SearchHeader from "./SearchHeader";
-import FilterSidebar from "./FilterSidebare";
+import FilterSidebar from "./FilterSidebar";
 import ResultsGrid from "./ResultsGrid";
 import FloatingFilterButton from "./FloatingFilterButton";
 import Modal from "@/components/ui/Modal";
-
-// Temporary mock data
-const mockResults: Movie[] = [
-  {
-    id: 1,
-    title: "Neo-Noir Chronicles",
-    poster_path: "/6tpAPeuuqbVnYWWPoOLEDLSBU7a.jpg",
-    vote_average: 9.2,
-    release_date: "2023-01-15",
-    moods: ["Gritty", "Neo-Noir"],
-    genres: [{ id: 878, name: "Sci-Fi" }],
-    overview: "",
-    backdrop_path: null,
-    vote_count: 0,
-    popularity: 0,
-    adult: false,
-  },
-  {
-    id: 2,
-    title: "Dust & Bone",
-    poster_path: "/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg",
-    vote_average: 8.9,
-    release_date: "2019-06-20",
-    moods: ["Post-Apoc", "Gritty"],
-    genres: [{ id: 18, name: "Drama" }],
-    overview: "",
-    backdrop_path: null,
-    vote_count: 0,
-    popularity: 0,
-    adult: false,
-  },
-  {
-    id: 3,
-    title: "Galactic Odyssey",
-    poster_path: "/7K8w6mdrJp0oaSoKWGyjSZ4Zv2z.jpg",
-    vote_average: 8.5,
-    release_date: "2021-11-05",
-    moods: ["Epic", "Gritty"],
-    genres: [
-      { id: 878, name: "Sci-Fi" },
-      { id: 12, name: "Adventure" },
-    ],
-    overview: "",
-    backdrop_path: null,
-    vote_count: 0,
-    popularity: 0,
-    adult: false,
-  },
-];
+import MovieCardSkeleton from "@/components/ui/MovieCardSkeleton";
+import { useExploreFilters } from "@/features/movie-discovery/hooks/useExploreFilter";
 
 export default function ExploreSection() {
-  const [activeFilters, setActiveFilters] = useState<string[]>([
-    "Gritty",
-    "Sci-Fi",
-    "1990-2024",
-  ]);
-  const [sortBy, setSortBy] = useState("Match Score");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<"match" | "release" | "popularity">(
+    "match"
+  );
+  const { filters, setMood, toggleGenre, setDecade, reset } =
+    useExploreFilters();
+
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
-  const totalMatches = 142;
+  const { data, isLoading } = useFilteredMovies({
+    searchQuery: searchQuery.trim() || undefined,
+    mood: filters.mood,
+    genres: filters.genres,
+    decade: filters.decade,
+    sortBy,
+  });
+
+  const movies = data?.results ?? [];
+  const totalMatches = data?.total ?? 0;
+
+  const handleRemoveFilter = (filter: string) => {
+    if (filter === filters.mood) {
+      setMood(undefined);
+    } else if (filters.genres.includes(filter)) {
+      toggleGenre(filter);
+    } else if (filters.decade?.toString() === filter) {
+      setDecade(undefined);
+    }
+  };
 
   return (
     <main className="min-h-screen bg-cinema-black text-white pb-24 md:pb-0 relative">
       <SearchHeader
-        activeFilters={activeFilters}
-        onRemoveFilter={(f) =>
-          setActiveFilters((prev) => prev.filter((x) => x !== f))
+        activeFilters={
+          [filters.mood, ...filters.genres, filters.decade?.toString()].filter(
+            Boolean
+          ) as string[]
         }
+        onRemoveFilter={handleRemoveFilter}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
       />
 
       <div className="flex flex-col md:flex-row">
-        {/* Desktop sidebar */}
+        {/* Desktop Sidebar */}
         <aside className="hidden md:block w-80 lg:w-96 border-r border-surface-grey/50 p-6 sticky top-16 self-start">
           <FilterSidebar
-            activeFilters={activeFilters}
-            onFilterChange={setActiveFilters}
+            mood={filters.mood}
+            genres={filters.genres}
+            decade={filters.decade}
+            onToggleMood={(m) =>
+              setMood(filters.mood === m ? undefined : (m as any))
+            }
+            onToggleGenre={toggleGenre}
+            onChangeDecade={setDecade}
+            onReset={reset}
           />
         </aside>
 
-        {/* Main content */}
+        {/* Main Content */}
         <div className="flex-1 p-4 md:p-6 lg:p-8">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+          <div
+            className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4"
+            aria-live="polite">
             <p className="text-metadata-grey text-sm md:text-base">
-              {totalMatches} movies match your current vibe
+              {isLoading
+                ? "Discovering movies..."
+                : `${totalMatches} ${
+                    totalMatches === 1 ? "movie" : "movies"
+                  } match your vibe`}
             </p>
 
             <div className="flex items-center gap-3">
-              <label htmlFor="sort" className="text-sm text-metadata-grey">
+              <label
+                htmlFor="sort-explore"
+                className="text-sm text-metadata-grey">
                 Sort by
               </label>
               <select
-                id="sort"
+                id="sort-explore"
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
+                onChange={(e) =>
+                  setSortBy(
+                    e.target.value as "match" | "release" | "popularity"
+                  )
+                }
                 className="bg-surface-grey border border-surface-grey/50 rounded-lg px-4 py-2 text-white text-sm focus:outline-none focus:border-electric-cyan">
-                <option>Match Score</option>
-                <option>Release Date</option>
-                <option>Popularity</option>
+                <option value="match">Match Score</option>
+                <option value="release">Release Date</option>
+                <option value="popularity">Popularity</option>
               </select>
             </div>
           </div>
 
-          <ResultsGrid movies={mockResults} />
+          {isLoading ? (
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+              {Array.from({ length: 12 }).map((_, i) => (
+                <MovieCardSkeleton key={i} variant="grid" />
+              ))}
+            </div>
+          ) : movies.length === 0 ? (
+            <div className="text-center py-20 text-zinc-400">
+              <p className="text-xl font-medium mb-3">No matches found</p>
+              <p className="text-sm max-w-md mx-auto">
+                Try adjusting your mood filter, search term, or clear some
+                selections.
+              </p>
+            </div>
+          ) : (
+            <ResultsGrid movies={movies} />
+          )}
         </div>
       </div>
 
-      {/* Mobile floating filter button */}
+      {/* Mobile filter trigger */}
       <FloatingFilterButton
+        activeCount={
+          (filters.mood ? 1 : 0) +
+          filters.genres.length +
+          (filters.decade ? 1 : 0)
+        }
         onClick={() => setIsFilterModalOpen(true)}
-        activeCount={activeFilters.length}
       />
 
       {/* Mobile filter modal */}
@@ -126,9 +142,16 @@ export default function ExploreSection() {
         onClose={() => setIsFilterModalOpen(false)}
         title="Filters">
         <FilterSidebar
-          activeFilters={activeFilters}
-          onFilterChange={setActiveFilters}
-          onClose={() => setIsFilterModalOpen(false)} // ← passes close handler
+          mood={filters.mood}
+          genres={filters.genres}
+          decade={filters.decade}
+          onToggleMood={(m) =>
+            setMood(filters.mood === m ? undefined : (m as any))
+          }
+          onToggleGenre={toggleGenre}
+          onChangeDecade={setDecade}
+          onReset={reset}
+          onApply={() => setIsFilterModalOpen(false)}
         />
       </Modal>
     </main>
