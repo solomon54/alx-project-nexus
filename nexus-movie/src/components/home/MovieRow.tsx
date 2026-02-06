@@ -1,28 +1,32 @@
-// src/components/home/MovieRow.tsx
-
+//src/components/home/MovieRow.tsx
 "use client";
 
-import MovieCard from "@/components/ui/MovieCard";
 import { Movie } from "@/types/movie";
+import MovieCard from "@/components/ui/MovieCard";
 import { ChevronRight } from "lucide-react";
 import { cn } from "@/utils/classNames";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface MovieRowProps {
   title: string;
   movies: Movie[];
   variant?: "default" | "trending";
   isLoading?: boolean;
+  onDismiss?: (id: number) => void;
+  onWatchlistToggle?: (id: number) => void;
 }
 
 export default function MovieRow({
   title,
   movies,
   variant = "default",
-  isLoading = false, // ← Default to false
+  isLoading = false,
+  onDismiss,
+  onWatchlistToggle,
 }: MovieRowProps) {
   const titleId = `movie-row-title-${title.replace(/\s+/g, "-").toLowerCase()}`;
 
-  // Optional: Show skeleton / loading state when isLoading is true
+  // Loading skeleton
   if (isLoading) {
     return (
       <section className="py-6 sm:py-8" aria-labelledby={titleId}>
@@ -35,7 +39,7 @@ export default function MovieRow({
             <div
               key={i}
               className={cn(
-                "snap-start shrink-0",
+                "snap-start",
                 variant === "trending"
                   ? "w-[240px] sm:w-[320px]"
                   : "w-[180px] sm:w-[260px]"
@@ -74,19 +78,30 @@ export default function MovieRow({
         role="list"
         aria-label={`${title} movies horizontal list – swipe or use arrow keys to navigate`}
         tabIndex={0}>
-        {movies.map((movie) => (
-          <div
-            key={movie.id}
-            className={cn(
-              "snap-start shrink-0",
-              variant === "trending"
-                ? "w-[240px] sm:w-[320px]"
-                : "w-[180px] sm:w-[260px]"
-            )}
-            role="listitem">
-            <MovieCard movie={movie} />
-          </div>
-        ))}
+        <AnimatePresence initial={false}>
+          {movies.map((movie) => (
+            <motion.div
+              key={movie.id}
+              layout
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 50 }}
+              transition={{ duration: 0.25 }}
+              className={cn(
+                "snap-start",
+                variant === "trending"
+                  ? "w-[240px] sm:w-[320px]"
+                  : "w-[180px] sm:w-[260px]"
+              )}
+              role="listitem">
+              <MovieCard
+                movie={movie}
+                onDismiss={() => onDismiss?.(movie.id)}
+                onWatchlistToggle={() => onWatchlistToggle?.(movie.id)}
+              />
+            </motion.div>
+          ))}
+        </AnimatePresence>
 
         {movies.length === 0 && !isLoading && (
           <div className="text-zinc-500 text-sm italic py-4">
