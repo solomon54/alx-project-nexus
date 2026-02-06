@@ -1,11 +1,19 @@
-// src/components/library/SyncBanner.tsx
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Cloud, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/utils/classNames";
 
-export default function SyncBanner() {
+interface SyncBannerProps {
+  isGuest?: boolean;
+}
+
+export default function SyncBanner({ isGuest = true }: SyncBannerProps) {
+  const router = useRouter();
+
+  if (!isGuest) return null;
+
   return (
     <div
       className={cn(
@@ -15,7 +23,6 @@ export default function SyncBanner() {
         "rounded-2xl border border-electric-cyan/25 backdrop-blur-md shadow-lg"
       )}>
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 md:gap-6">
-        {/* Left: Icon + Text */}
         <div className="flex items-start gap-3 text-center sm:text-left">
           <Cloud
             className="text-electric-cyan shrink-0 mt-1"
@@ -40,7 +47,8 @@ export default function SyncBanner() {
             "text-sm md:text-base font-semibold",
             "shadow-md hover:shadow-lg focus:ring-2 focus:ring-offset-2 focus:ring-offset-cinema-black focus:ring-electric-cyan"
           )}
-          aria-label="Sign up to sync your library to the cloud">
+          aria-label="Sign up to sync your library to the cloud"
+          onClick={() => router.push("/auth")}>
           <LogIn size={18} className="mr-2" />
           Sign Up
         </Button>
