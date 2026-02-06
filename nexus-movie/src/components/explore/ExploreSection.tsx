@@ -1,4 +1,4 @@
-// src/components/explore/ExploreSection.tsx
+//src/components/explore/ExploreSection.tsx
 "use client";
 
 import { useState } from "react";
@@ -10,16 +10,19 @@ import FloatingFilterButton from "./FloatingFilterButton";
 import Modal from "@/components/ui/Modal";
 import MovieCardSkeleton from "@/components/ui/MovieCardSkeleton";
 import { useExploreFilters } from "@/features/movie-discovery/hooks/useExploreFilter";
+import { memoryStore } from "@/features/memory/memory.store";
+import { Movie } from "@/types/movie";
 
 export default function ExploreSection() {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [sortBy, setSortBy] = useState<"match" | "release" | "popularity">(
     "match"
   );
   const { filters, setMood, toggleGenre, setDecade, reset } =
     useExploreFilters();
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState<boolean>(false);
 
-  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [version, setVersion] = useState<number>(0);
 
   const { data, isLoading } = useFilteredMovies({
     searchQuery: searchQuery.trim() || undefined,
@@ -29,17 +32,35 @@ export default function ExploreSection() {
     sortBy,
   });
 
-  const movies = data?.results ?? [];
-  const totalMatches = data?.total ?? 0;
+  const rawMovies: Movie[] = data?.results ?? [];
 
+  const moviesWithState = rawMovies.map((movie) => ({
+    ...movie,
+    is_dismissed: memoryStore.isDismissed(movie.id),
+    is_watchlisted: memoryStore.isWatchlisted(movie.id),
+  }));
+
+  // show only non-dismissed movies
+  const visibleMovies = moviesWithState.filter((m) => !m.is_dismissed);
+
+  const totalMatches = visibleMovies.length;
+
+  // Handlers
   const handleRemoveFilter = (filter: string) => {
-    if (filter === filters.mood) {
-      setMood(undefined);
-    } else if (filters.genres.includes(filter)) {
-      toggleGenre(filter);
-    } else if (filters.decade?.toString() === filter) {
-      setDecade(undefined);
-    }
+    if (filter === filters.mood) setMood(undefined);
+    else if (filters.genres.includes(filter)) toggleGenre(filter);
+    else if (filters.decade?.toString() === filter) setDecade(undefined);
+  };
+
+  const handleDismiss = (id: number) => {
+    memoryStore.dismissMovie(id);
+    setVersion((v) => v + 1);
+  };
+
+  const handleWatchlistToggle = (id: number) => {
+    if (memoryStore.isWatchlisted(id)) memoryStore.removeFromWatchlist(id);
+    else memoryStore.addToWatchlist(id);
+    setVersion((v) => v + 1);
   };
 
   return (
@@ -112,7 +133,7 @@ export default function ExploreSection() {
                 <MovieCardSkeleton key={i} variant="grid" />
               ))}
             </div>
-          ) : movies.length === 0 ? (
+          ) : visibleMovies.length === 0 ? (
             <div className="text-center py-20 text-zinc-400">
               <p className="text-xl font-medium mb-3">No matches found</p>
               <p className="text-sm max-w-md mx-auto">
@@ -121,7 +142,11 @@ export default function ExploreSection() {
               </p>
             </div>
           ) : (
-            <ResultsGrid movies={movies} />
+            <ResultsGrid
+              movies={visibleMovies}
+              onDismiss={handleDismiss}
+              onWatchlistToggle={handleWatchlistToggle}
+            />
           )}
         </div>
       </div>
