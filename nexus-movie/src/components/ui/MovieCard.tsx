@@ -36,6 +36,9 @@ export default function MovieCard({
   };
 
   const [saved, setSaved] = useState(isSaved);
+  useEffect(() => {
+    setSaved(isSaved);
+  }, [isSaved]);
 
   const toggleWatchlist = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -82,8 +85,8 @@ export default function MovieCard({
           className={cn(
             "absolute top-2 right-2 z-10 p-1.5 rounded-full backdrop-blur-md hover:cursor-pointer border transition-all",
             isSaved
-              ? "bg-electric-cyan text-black border-electric-cyan" // clearly marked
-              : "bg-black/40 text-white border-white/10 hover:bg-electric-cyan/20 hover:border-electric-cyan/50" // neutral + hover feedback
+              ? "bg-black text-white border-electric-cyan"
+              : "bg-black/40 text-white border-white/10 hover:bg-electric-cyan/20 hover:border-electric-cyan/50"
           )}
           aria-label={isSaved ? "Remove from Watchlist" : "Add to Watchlist"}>
           <Bookmark
