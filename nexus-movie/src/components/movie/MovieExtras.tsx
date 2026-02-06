@@ -1,11 +1,17 @@
 import { Movie, Provider } from "@/types/movie";
+import { cn } from "@/utils/classNames";
 
 interface MovieExtrasProps {
   movie: Movie;
   providers: Provider[];
+  providerFallbacks: Record<string, string>;
 }
 
-export const MovieExtras = ({ movie, providers }: MovieExtrasProps) => {
+export const MovieExtras = ({
+  movie,
+  providers,
+  providerFallbacks,
+}: MovieExtrasProps) => {
   const director =
     movie.credits?.crew?.find((c) => c.job === "Director")?.name ?? "Unknown";
   const country = movie.production_countries?.[0]?.name ?? "Unknown";
@@ -28,52 +34,43 @@ export const MovieExtras = ({ movie, providers }: MovieExtrasProps) => {
         </h3>
 
         <div className="flex flex-wrap gap-5 md:gap-6">
-          {providers.length > 0 ? (
-            providers.map((provider) => {
-              const logoSrc =
-                (provider as any).custom_logo ||
-                (provider.logo_path
-                  ? `https://image.tmdb.org/t/p/original${provider.logo_path}`
-                  : null);
+          <div className="flex flex-wrap gap-3">
+            {providers.length > 0 ? (
+              providers.map((provider) => {
+                const href =
+                  provider.deep_link ||
+                  providerFallbacks[provider.provider_name];
 
-              return (
-                <a
-                  key={provider.provider_id}
-                  href={provider.deep_link ?? "#"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group relative w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden bg-zinc-900/80 border border-zinc-700/70 hover:border-red-600/50 transition-all duration-300 shadow-lg hover:shadow-2xl hover:scale-105 active:scale-100">
-                  {logoSrc ? (
-                    <img
-                      src={logoSrc}
-                      alt={provider.provider_name}
-                      className="w-full h-full object-contain p-4 md:p-5 transition-all group-hover:brightness-110"
-                      onError={(e) => {
-                        e.currentTarget.src = "/fallback-provider.png";
-                        e.currentTarget.classList.remove("p-4", "p-5");
-                        e.currentTarget.classList.add("p-3");
-                      }}
-                    />
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-zinc-800 to-zinc-950">
-                      <span className="text-xl md:text-2xl font-bold text-zinc-400 tracking-wider">
-                        {provider.provider_name.slice(0, 3).toUpperCase()}
-                      </span>
-                    </div>
-                  )}
+                const label =
+                  provider.monetization_type === "rent"
+                    ? `Rent on ${provider.provider_name}`
+                    : provider.monetization_type === "buy"
+                    ? `Buy on ${provider.provider_name}`
+                    : `Watch on ${provider.provider_name}`;
 
-                  {/* Name tooltip */}
-                  <span className="absolute -bottom-9 left-1/2 -translate-x-1/2 bg-zinc-900/95 text-zinc-200 text-xs md:text-sm px-4 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap border border-zinc-700/80 shadow-md">
-                    {provider.provider_name}
-                  </span>
-                </a>
-              );
-            })
-          ) : (
-            <p className="text-zinc-500 text-base">
-              No streaming options available
-            </p>
-          )}
+                return (
+                  <a
+                    key={provider.provider_id}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-disabled={!href}
+                    className={cn(
+                      "inline-flex items-center justify-center px-5 py-3 rounded-full text-sm md:text-base font-semibold transition-all border",
+                      href
+                        ? "bg-red-600/80 text-white border-red-600 hover:bg-red-600 hover:scale-[1.03] active:scale-100"
+                        : "bg-zinc-800 text-zinc-400 border-zinc-700 pointer-events-none"
+                    )}>
+                    {label}
+                  </a>
+                );
+              })
+            ) : (
+              <p className="text-zinc-500 text-base">
+                No streaming options available
+              </p>
+            )}
+          </div>
         </div>
       </div>
 
@@ -85,30 +82,40 @@ export const MovieExtras = ({ movie, providers }: MovieExtrasProps) => {
           </h3>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 md:gap-8">
-            {cast.map((actor) => (
-              <div
-                key={actor.id}
-                className="group flex flex-col items-center text-center transition-all duration-300 hover:scale-105">
-                <div className="relative w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden border-2 border-zinc-700/60 shadow-xl mb-3">
-                  <img
-                    src={
-                      "/fallback-avatar.png" //
-                    }
-                    alt={actor.name}
-                    className="w-full h-full object-cover transition-transform group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                </div>
-                <p className="text-sm md:text-base font-medium text-zinc-200 group-hover:text-white line-clamp-2">
-                  {actor.name}
-                </p>
-                {actor.character && (
-                  <p className="text-xs text-zinc-500 mt-1 line-clamp-1">
-                    {actor.character}
+            {cast.map((actor) => {
+              const actorImageSrc = actor.profile_path
+                ? `https://image.tmdb.org/t/p/w185${actor.profile_path}`
+                : "/fallback-avatar.png";
+
+              return (
+                <div
+                  key={actor.id}
+                  className="group flex flex-col items-center text-center transition-all duration-300 hover:scale-105">
+                  <div className="relative w-12 h-12 md:w-16 md:h-16 xl:w-28 xl:h-28 rounded-full overflow-hidden border-2 border-zinc-700/60 shadow-xl mb-3">
+                    <img
+                      src={actorImageSrc}
+                      alt={actor.name}
+                      loading="lazy"
+                      className="w-full h-full object-cover transition-transform group-hover:scale-110"
+                      onError={(e) => {
+                        e.currentTarget.src = "/fallback-avatar.png";
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+
+                  <p className="text-sm md:text-base font-medium text-zinc-200 group-hover:text-white line-clamp-2">
+                    {actor.name}
                   </p>
-                )}
-              </div>
-            ))}
+
+                  {actor.character && (
+                    <p className="text-xs text-zinc-500 mt-1 line-clamp-1">
+                      {actor.character}
+                    </p>
+                  )}
+                </div>
+              );
+            })}
 
             {cast.length === 0 && (
               <p className="col-span-full text-zinc-500 text-center py-8">

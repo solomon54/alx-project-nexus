@@ -23,11 +23,23 @@ export const MovieDetailsSection = ({
   const [, forceUpdate] = useState(0);
   const refresh = () => forceUpdate((v) => v + 1);
 
+  const PROVIDER_FALLBACKS: Record<string, string> = {
+    Netflix: "https://www.netflix.com",
+    "Amazon Prime Video": "https://www.primevideo.com",
+    "Disney Plus": "https://www.disneyplus.com",
+    "Apple TV Plus": "https://tv.apple.com",
+  };
+
   const handleWatchNow = () => {
     const primary =
       providers.find((p) => p.monetization_type === "flatrate") ?? providers[0];
-    if (primary?.deep_link) {
-      window.open(primary.deep_link, "_blank", "noopener,noreferrer");
+
+    if (!primary) return;
+
+    const url = primary.deep_link || PROVIDER_FALLBACKS[primary.provider_name];
+
+    if (url) {
+      window.open(url, "_blank", "noopener,noreferrer");
     }
   };
 
@@ -134,7 +146,11 @@ export const MovieDetailsSection = ({
 
         {/* Extras */}
         <div className="px-5 sm:px-8 md:px-12 lg:px-16 pb-24 pt-8 md:pt-12 max-w-7xl mx-auto border-t border-zinc-800/50">
-          <MovieExtras movie={movie} providers={providers} />
+          <MovieExtras
+            movie={movie}
+            providers={providers}
+            providerFallbacks={PROVIDER_FALLBACKS}
+          />
         </div>
       </div>
     </div>
