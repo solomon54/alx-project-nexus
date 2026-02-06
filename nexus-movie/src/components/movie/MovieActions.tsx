@@ -1,6 +1,8 @@
+//src/components/movie/MovieActions.tsx
 import { Provider } from "@/types/movie";
 import { Bookmark, Tag, ThumbsDown } from "lucide-react";
 import { Button } from "../ui/Button";
+import { cn } from "@/utils/classNames";
 
 interface MovieActionsProps {
   providers: Provider[];
@@ -8,6 +10,8 @@ interface MovieActionsProps {
   onAddToWatchlist: () => void;
   onRateVibe: () => void;
   onDismiss: () => void;
+  isWatchlisted: boolean;
+  isDismissed: boolean;
 }
 
 export const MovieActions = ({
@@ -16,6 +20,8 @@ export const MovieActions = ({
   onAddToWatchlist,
   onRateVibe,
   onDismiss,
+  isWatchlisted,
+  isDismissed,
 }: MovieActionsProps) => {
   const primary =
     providers.find((p) => p.monetization_type === "flatrate") ?? providers[0];
@@ -31,8 +37,13 @@ export const MovieActions = ({
 
       <Button
         onClick={onAddToWatchlist}
-        className="bg-zinc-800 hover:bg-zinc-700 text-white px-8 py-6 font-semibold flex items-center gap-2 rounded border border-zinc-600 min-w-[180px]">
-        <Bookmark size={18} /> Add to Watchlist
+        className={`px-8 py-6 font-semibold flex items-center gap-2 rounded border min-w-[180px] ${
+          isWatchlisted
+            ? "bg-green-600 hover:bg-green-700 text-white border-green-700"
+            : "bg-zinc-800 hover:bg-zinc-700 text-white border-zinc-600"
+        }`}>
+        <Bookmark size={18} />{" "}
+        {isWatchlisted ? "In Watchlist" : "Add to Watchlist"}
       </Button>
 
       <Button
@@ -42,10 +53,13 @@ export const MovieActions = ({
       </Button>
 
       <Button
-        variant="outline"
         onClick={onDismiss}
-        className="bg-zinc-900 hover:bg-zinc-800 text-zinc-300 px-8 py-6 font-semibold flex items-center gap-2 rounded border border-zinc-700 min-w-[160px]">
-        <ThumbsDown size={18} /> Not Interested
+        className={`px-8 py-6 font-semibold flex items-center gap-2 rounded border min-w-[160px] ${
+          isDismissed
+            ? "bg-red-600 hover:bg-red-700 text-white border-red-700"
+            : "bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border-zinc-700"
+        }`}>
+        <ThumbsDown size={18} /> {isDismissed ? "Dismissed" : "Not Interested"}
       </Button>
     </div>
   );

@@ -21,7 +21,7 @@ export const MovieHero = ({
     ? movie.backdrop_path
     : `https://image.tmdb.org/t/p/original${movie.backdrop_path}`;
   const trailerUrl = movie.trailer_key
-    ? `https://www.youtube.com/embed/${movie.trailer_key}?autoplay=1&mute=1&rel=0`
+    ? `https://www.youtube.com/embed/${movie.trailer_key}?autoplay=1&unmute=1&rel=0`
     : null;
 
   return (
