@@ -1,7 +1,8 @@
 // src/components/home/HomeSection.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
+
 import HomeHeader from "./HomeHeader";
 import HeroSection from "./HeroSection";
 import MovieRow from "./MovieRow";
@@ -16,7 +17,6 @@ import { memoryStore } from "@/features/memory/memory.store";
 export default function HomeSection() {
   const [activeMood, setActiveMood] = useState<DiscoveryMood | undefined>();
   const [query, setQuery] = useState("");
-
   const [version, setVersion] = useState(0);
 
   const {
@@ -33,17 +33,21 @@ export default function HomeSection() {
 
   const { data: searchResults } = useMovieSearch(query);
 
-  const rawRowMovies = (query ? searchResults : discoverData?.results) ?? [];
+  //  Recompute movie decisions
 
-  const decidedRowMovies = rawRowMovies.map((movie) =>
-    decideMovie({
-      ...movie,
-      is_watchlisted: memoryStore.isWatchlisted(movie.id),
-      is_dismissed: memoryStore.isDismissed(movie.id),
-    })
-  );
+  const processedMovies = useMemo(() => {
+    const rawRowMovies = (query ? searchResults : discoverData?.results) ?? [];
 
-  const visibleRowMovies = decidedRowMovies.filter(
+    return rawRowMovies.map((movie) =>
+      decideMovie({
+        ...movie,
+        is_watchlisted: memoryStore.isWatchlisted(movie.id),
+        is_dismissed: memoryStore.isDismissed(movie.id),
+      })
+    );
+  }, [query, searchResults, discoverData]);
+
+  const visibleRowMovies = processedMovies.filter(
     (m) => m.decision !== "dismissed"
   );
 
