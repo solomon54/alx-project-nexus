@@ -1,3 +1,4 @@
+// src/components/movie/MovieDetailsSection.tsx
 "use client";
 
 import { useState } from "react";
@@ -9,6 +10,8 @@ import { MovieExtras } from "./MovieExtras";
 import { cn } from "@/utils/classNames";
 import { Star } from "lucide-react";
 
+import { memoryStore } from "@/features/memory/memory.store";
+
 export const MovieDetailsSection = ({
   movie,
   providers,
@@ -17,6 +20,8 @@ export const MovieDetailsSection = ({
   providers: Provider[];
 }) => {
   const [playing, setPlaying] = useState(false);
+  const [, forceUpdate] = useState(0);
+  const refresh = () => forceUpdate((v) => v + 1);
 
   const handleWatchNow = () => {
     const primary =
@@ -26,13 +31,23 @@ export const MovieDetailsSection = ({
     }
   };
 
-  const handleAddToWatchlist = () => console.log("Added to watchlist");
-  const handleRateVibe = () => console.log("Rate vibe");
-  const handleDismiss = () => console.log("Dismissed");
+  const handleAddToWatchlist = () => {
+    memoryStore.addToWatchlist(movie.id);
+    refresh();
+  };
+
+  const handleDismiss = () => {
+    memoryStore.dismissMovie(movie.id);
+    refresh();
+  };
+
+  const handleRateVibe = () => {
+    console.log("Rate vibe (coming next)");
+  };
 
   return (
     <div className="bg-cinema-black text-white min-h-screen">
-      {/* Hero / Player Area*/}
+      {/* Hero / Player Area */}
       <div
         className={cn(
           "relative w-full",
@@ -46,7 +61,7 @@ export const MovieDetailsSection = ({
         />
       </div>
 
-      {/* Content – changes position based on playing state */}
+      {/* Content  */}
       <div className="relative z-10">
         {playing ? (
           <div className="px-5 sm:px-8 md:px-12 lg:px-16 pt-6 pb-16 max-w-6xl mx-auto">
@@ -71,13 +86,15 @@ export const MovieDetailsSection = ({
               </div>
             </div>
 
-            {/* Actions row  */}
+            {/* Actions row */}
             <MovieActions
               providers={providers}
               onWatchNow={handleWatchNow}
               onAddToWatchlist={handleAddToWatchlist}
               onRateVibe={handleRateVibe}
               onDismiss={handleDismiss}
+              isWatchlisted={memoryStore.isWatchlisted(movie.id)}
+              isDismissed={memoryStore.isDismissed(movie.id)}
             />
 
             {/* Overview + moods */}
@@ -97,7 +114,7 @@ export const MovieDetailsSection = ({
           </div>
         ) : (
           <div className="px-5 sm:px-8 md:px-12 lg:px-16 -mt-40 md:-mt-64 pb-16 max-w-6xl mx-auto">
-            <div className="bg-gradient-to-t from-cinema-black via-cinema-black/80 to-transparent rounded-t-2xl p-6 md:p-10 pt-16 md:pt-24 backdrop-blur-md border-t border-white/5">
+            <div className="bg-linear-to-t from-cinema-black via-cinema-black/80 to-transparent rounded-t-2xl p-6 md:p-10 pt-16 md:pt-24 backdrop-blur-md border-t border-white/5">
               <MovieMeta movie={movie} />
 
               <div className="mt-8 md:mt-10">
@@ -107,13 +124,15 @@ export const MovieDetailsSection = ({
                   onAddToWatchlist={handleAddToWatchlist}
                   onRateVibe={handleRateVibe}
                   onDismiss={handleDismiss}
+                  isWatchlisted={memoryStore.isWatchlisted(movie.id)}
+                  isDismissed={memoryStore.isDismissed(movie.id)}
                 />
               </div>
             </div>
           </div>
         )}
 
-        {/* Extras  */}
+        {/* Extras */}
         <div className="px-5 sm:px-8 md:px-12 lg:px-16 pb-24 pt-8 md:pt-12 max-w-7xl mx-auto border-t border-zinc-800/50">
           <MovieExtras movie={movie} providers={providers} />
         </div>
