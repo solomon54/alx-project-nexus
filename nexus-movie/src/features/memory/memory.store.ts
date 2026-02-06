@@ -1,4 +1,5 @@
-import { MemoryState, MovieId } from "./memory.types";
+// src/features/memory/memory.store.ts
+import { MemoryState, MovieId, DiscoveryMood } from "./memory.types";
 import { loadMemory, saveMemory } from "./memory.persistence";
 
 type Listener = () => void;
@@ -31,6 +32,14 @@ class MemoryStore {
     return this.state.dismissed.has(id);
   }
 
+  getMood(): DiscoveryMood | undefined {
+    return this.state.mood;
+  }
+
+  getGenres(): string[] {
+    return this.state.genres;
+  }
+
   // -------- commands --------
   addToWatchlist(id: MovieId) {
     this.state.watchlist.add(id);
@@ -52,6 +61,19 @@ class MemoryStore {
     this.notify();
   }
 
+  // -------- onboarding commands --------
+  setMood(mood: DiscoveryMood) {
+    this.state.mood = mood;
+    saveMemory(this.state);
+    this.notify();
+  }
+
+  setGenres(genres: string[]) {
+    this.state.genres = genres;
+    saveMemory(this.state);
+    this.notify();
+  }
+
   // -------- guest → member merge --------
   mergeGuestMemory(guestState: MemoryState) {
     this.state.watchlist = new Set([
@@ -67,6 +89,9 @@ class MemoryStore {
     // dismissed > watchlist
     this.state.dismissed.forEach((id) => this.state.watchlist.delete(id));
 
+    if (guestState.mood) this.state.mood = guestState.mood;
+    if (guestState.genres?.length) this.state.genres = guestState.genres;
+
     saveMemory(this.state);
     this.notify();
   }
@@ -75,6 +100,8 @@ class MemoryStore {
   clear() {
     this.state.watchlist.clear();
     this.state.dismissed.clear();
+    this.state.mood = undefined;
+    this.state.genres = [];
     saveMemory(this.state);
     this.notify();
   }
