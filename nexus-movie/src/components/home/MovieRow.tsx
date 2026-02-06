@@ -1,4 +1,4 @@
-//src/components/home/MovieRow.tsx
+// src/components/home/MovieRow.tsx
 "use client";
 
 import { Movie } from "@/types/movie";
@@ -25,6 +25,9 @@ export default function MovieRow({
   onWatchlistToggle,
 }: MovieRowProps) {
   const titleId = `movie-row-title-${title.replace(/\s+/g, "-").toLowerCase()}`;
+
+  // We just use the already enriched movies
+  const visibleMovies = movies.filter((m) => !m.is_dismissed);
 
   // Loading skeleton
   if (isLoading) {
@@ -63,7 +66,7 @@ export default function MovieRow({
 
         <button
           type="button"
-          className="flex items-center gap-1 text-xs font-semibold text-zinc-400 hover:text-electric-cyan transition-colors group focus:outline-none focus:ring-2 focus:ring-electric-cyan focus:ring-offset-2 focus:ring-offset-cinema-black"
+          className="flex items-center gap-1 text-xs font-semibold text-zinc-400 hover:text-electric-cyan transition-colors group"
           aria-label={`View all ${title}`}>
           VIEW ALL
           <ChevronRight
@@ -76,10 +79,10 @@ export default function MovieRow({
       <div
         className="flex overflow-x-auto gap-3 sm:gap-5 px-5 sm:px-12 pb-4 snap-x snap-mandatory scrollbar-hide"
         role="list"
-        aria-label={`${title} movies horizontal list – swipe or use arrow keys to navigate`}
+        aria-label={`${title} movies horizontal list`}
         tabIndex={0}>
         <AnimatePresence initial={false}>
-          {movies.map((movie) => (
+          {visibleMovies.map((movie) => (
             <motion.div
               key={movie.id}
               layout
@@ -96,14 +99,15 @@ export default function MovieRow({
               role="listitem">
               <MovieCard
                 movie={movie}
-                onDismiss={() => onDismiss?.(movie.id)}
-                onWatchlistToggle={() => onWatchlistToggle?.(movie.id)}
+                isSaved={movie.is_watchlisted} // ← already correct value
+                onDismiss={() => onDismiss?.(movie.id)} // ← only call parent
+                onWatchlistToggle={() => onWatchlistToggle?.(movie.id)} // ← only call parent
               />
             </motion.div>
           ))}
         </AnimatePresence>
 
-        {movies.length === 0 && !isLoading && (
+        {visibleMovies.length === 0 && !isLoading && (
           <div className="text-zinc-500 text-sm italic py-4">
             No movies available in this row
           </div>
