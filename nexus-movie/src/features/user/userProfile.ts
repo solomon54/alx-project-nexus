@@ -12,9 +12,8 @@ export const useProfile = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  /**
-   * Updates Profile metadata (Username, Bio, Avatar)
-   */
+  //Updates Profile metadata (Username, Bio, Avatar)
+
   const updateProfile = async (
     data: { username: string; bio: string },
     imageFile: File | null
@@ -28,8 +27,6 @@ export const useProfile = () => {
       let avatarUrl = user.user_metadata?.avatar_url;
 
       if (imageFile) {
-        // Use user.id as the folder and 'avatar' as filename for automatic overwriting
-        // This prevents storage bloat from old profile pictures
         const fileExt = imageFile.name.split(".").pop();
         const path = `${user.id}/avatar-${Date.now()}.${fileExt}`;
 
@@ -69,9 +66,8 @@ export const useProfile = () => {
     }
   };
 
-  /**
-   * INTERNAL Password Change (No email link required)
-   */
+  //INTERNAL Password Change (No email link required)
+
   const changePasswordInternal = async (newPassword: string) => {
     setLoading(true);
     setError(null);
@@ -91,9 +87,6 @@ export const useProfile = () => {
     }
   };
 
-  /**
-   * LEGACY: Sends a password reset email if preferred
-   */
   const sendPasswordReset = async () => {
     if (!user?.email) return;
     try {
