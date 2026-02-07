@@ -33,7 +33,7 @@ export const AuthSection = () => {
     validateField,
   } = useAuthForm(mode);
 
-  //3. Fallback: Home '/'
+  // Fallback: Home '/'
 
   const getSafeRedirect = useCallback(() => {
     const next = searchParams.get("next");
@@ -57,7 +57,7 @@ export const AuthSection = () => {
     }
   }, [user, authLoading, router, getSafeRedirect]);
 
-  // Block the form if we are checking auth or already logged in
+
   if (authLoading || user) {
     return (
       <div className="min-h-screen bg-cinema-black flex flex-col items-center justify-center">
@@ -183,7 +183,7 @@ export const AuthSection = () => {
               </span>
             </div>
           </div>
-          ;
+
           <div className="grid grid-cols-2 gap-4">
             <button
               onClick={() => signInWithGoogle()}

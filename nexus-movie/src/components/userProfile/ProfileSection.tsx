@@ -1,25 +1,32 @@
+//src/components/userProfile/ProfileSection.tsx
 "use client";
 
-import { useState } from "react"; // Removed useEffect/supabase import since useAuth handles it
+import { useState } from "react"; 
 import { motion, AnimatePresence } from "framer-motion";
 import ProfileTabs from "./ProfileTabs";
 import ProfilePanel from "./ProfilePanel";
 import AccountPanel from "./AccountPanel";
 import PreferencesPanel from "./PreferencesPanel";
 import { useProfile } from "@/features/user/userProfile";
-import { useAuth } from "@/contexts/AuthContext"; // Import this!
+import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/utils/classNames";
 
 type SettingsTab = "profile" | "account" | "preferences";
 
 export default function ProfileSection() {
   const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
+  const { user } = useAuth();
+  const { updateProfile, sendPasswordReset, loading, error } = useProfile();
 
-  // 1. Use your AuthContext to get the user (cleaner than local state)
+  const profileInitialData = {
+    username: user?.username || "",
+
+    bio: (user as any)?.bio || "",
+    avatar_url: user?.avatar_url || "",
+  };
+
   const { user } = useAuth();
 
-  // 2. Call hook without passing 'user' (it gets it from context internally)
-  // 3. Destructure 'sendPasswordReset' (matching your hook's name)
   const { updateProfile, sendPasswordReset, loading, error } = useProfile();
 
   // Prepare initial data
@@ -72,7 +79,6 @@ export default function ProfileSection() {
                 <AccountPanel
                   email={user?.email}
                   isProcessing={loading}
-                  // 4. Corrected the prop name here
                   onPasswordReset={sendPasswordReset}
                 />
               )}
