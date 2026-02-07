@@ -14,6 +14,7 @@ export interface User {
   user_metadata: UserMetadata;
   username?: string;
   avatar_url?: string | null;
+  bio?: string;
 }
 
 export interface AuthState {
