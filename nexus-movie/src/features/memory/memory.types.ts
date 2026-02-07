@@ -6,7 +6,9 @@ export type DiscoveryMood =
   | "intense"
   | "mind_bending"
   | "emotional"
-  | "gritty";
+  | "gritty"
+  | "epic"
+  | "uplifting";
 
 export interface MemoryState {
   watchlist: Set<MovieId>;
