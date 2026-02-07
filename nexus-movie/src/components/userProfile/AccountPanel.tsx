@@ -1,3 +1,4 @@
+//src/components/userProfile/AccountPanel.tsx
 "use client";
 
 import { useState } from "react";
@@ -10,6 +11,8 @@ import {
   CheckCircle2,
   Loader2,
   ChevronRight,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useProfile } from "@/features/user/userProfile";
@@ -19,6 +22,7 @@ export default function AccountPanel({ email = "user@example.com" }) {
   const { changePasswordInternal, loading, error } = useProfile();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isChanging, setIsChanging] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
 
@@ -30,6 +34,7 @@ export default function AccountPanel({ email = "user@example.com" }) {
     if (result.success) {
       setIsSuccess(true);
       setNewPassword("");
+      setShowPassword(false);
       setTimeout(() => {
         setIsSuccess(false);
         setIsChanging(false);
@@ -60,7 +65,7 @@ export default function AccountPanel({ email = "user@example.com" }) {
         </div>
       </section>
 
-      {/* 2. Security Section (Internal Change) */}
+      {/* 2. Security Section */}
       <section className="space-y-4">
         <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 ml-1">
           Security
@@ -68,7 +73,7 @@ export default function AccountPanel({ email = "user@example.com" }) {
 
         <div
           className={cn(
-            "bg-zinc-900/40 border border-white/5 rounded-[2rem] transition-all duration-300",
+            "bg-zinc-900/40 border border-white/5 rounded-[2rem] transition-all duration-500",
             isChanging ? "p-6 ring-1 ring-white/10" : "p-2"
           )}>
           {!isChanging ? (
@@ -84,7 +89,7 @@ export default function AccountPanel({ email = "user@example.com" }) {
                     Change Password
                   </p>
                   <p className="text-[11px] text-zinc-500">
-                    Update your account security internally
+                    Update your account security
                   </p>
                 </div>
               </div>
@@ -96,23 +101,51 @@ export default function AccountPanel({ email = "user@example.com" }) {
                 <h4 className="text-sm font-bold text-white">New Password</h4>
                 <button
                   type="button"
-                  onClick={() => setIsChanging(false)}
-                  className="text-[10px] font-black uppercase text-zinc-500 hover:text-white">
+                  onClick={() => {
+                    setIsChanging(false);
+                    setNewPassword("");
+                  }}
+                  className="text-[10px] font-black uppercase text-zinc-500 hover:text-white transition-colors">
                   Cancel
                 </button>
               </div>
 
-              <input
-                autoFocus
-                type="password"
-                placeholder="Minimum 6 characters"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-electric-cyan/50 transition-all"
-              />
+              <div className="relative group">
+                <input
+                  autoFocus
+                  id="new-password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Minimum 6 characters"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 pr-12 text-sm text-white outline-none focus:border-electric-cyan/50 focus:ring-1 focus:ring-electric-cyan/20 transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition-colors"
+                  aria-label={showPassword ? "Hide password" : "Show password"}>
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+
+              {/* Password Strength Indicator (Subtle) */}
+              <div className="flex gap-1 px-1">
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className={cn(
+                      "h-1 flex-1 rounded-full transition-all duration-500",
+                      newPassword.length >= i * 2
+                        ? "bg-electric-cyan"
+                        : "bg-zinc-800"
+                    )}
+                  />
+                ))}
+              </div>
 
               {error && (
-                <div className="flex items-center gap-2 text-red-400 text-[10px] font-bold uppercase tracking-wider">
+                <div className="flex items-center gap-2 text-red-400 text-[10px] font-bold uppercase tracking-wider animate-shake">
                   <AlertCircle size={14} /> {error}
                 </div>
               )}
@@ -121,11 +154,13 @@ export default function AccountPanel({ email = "user@example.com" }) {
                 type="submit"
                 disabled={loading || newPassword.length < 6}
                 className={cn(
-                  "w-full py-4 rounded-xl font-black uppercase tracking-widest text-[10px]",
-                  isSuccess ? "bg-green-500" : "bg-electric-cyan text-black"
+                  "w-full py-4 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all duration-300",
+                  isSuccess
+                    ? "bg-green-500 text-white"
+                    : "bg-electric-cyan text-black hover:shadow-[0_0_20px_rgba(0,255,242,0.15)]"
                 )}>
                 {loading ? (
-                  <Loader2 className="animate-spin" size={16} />
+                  <Loader2 className="animate-spin mx-auto" size={16} />
                 ) : isSuccess ? (
                   <div className="flex items-center gap-2 justify-center">
                     <CheckCircle2 size={16} /> Password Updated
@@ -161,19 +196,23 @@ export default function AccountPanel({ email = "user@example.com" }) {
                 Final Warning
               </h4>
             </div>
-            <p className="text-xs text-zinc-500 leading-relaxed mb-6">
-              Deleting your account is permanent. All of your lists, reviews,
-              and progress will be lost forever.
+            <p className="text-xs text-zinc-400 leading-relaxed mb-6">
+              Deleting your account is permanent. All lists, reviews, and
+              progress will be{" "}
+              <span className="text-red-500 font-bold italic">
+                permanently purged
+              </span>{" "}
+              from Nexus.
             </p>
             <div className="flex gap-3">
-              <Button
+              <button
                 onClick={() => setShowDeleteConfirm(false)}
-                className="flex-1 bg-white/5 text-white hover:bg-white/10 rounded-xl py-3 text-[10px] font-black uppercase">
-                Back Down
-              </Button>
-              <Button className="flex-1 bg-red-600 hover:bg-red-700 text-white rounded-xl py-3 text-[10px] font-black uppercase">
+                className="flex-1 bg-white/5 text-white hover:bg-white/10 rounded-xl py-3 text-[10px] font-black uppercase transition-colors">
+                Cancel
+              </button>
+              <button className="flex-1 bg-red-600 hover:bg-red-700 text-white rounded-xl py-3 text-[10px] font-black uppercase transition-shadow hover:shadow-[0_0_20px_rgba(220,38,38,0.3)]">
                 Wipe Account
-              </Button>
+              </button>
             </div>
           </motion.div>
         )}
