@@ -16,6 +16,13 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "via.placeholder.com",
       },
+      // ADD THIS SECTION:
+      {
+        protocol: "https",
+        hostname: "taqrgsafgexysnqrvzje.supabase.co",
+        port: "",
+        pathname: "/storage/v1/object/public/**",
+      },
     ],
   },
 };

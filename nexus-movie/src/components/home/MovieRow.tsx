@@ -26,7 +26,6 @@ export default function MovieRow({
 }: MovieRowProps) {
   const titleId = `movie-row-title-${title.replace(/\s+/g, "-").toLowerCase()}`;
 
-  // We just use the already enriched movies
   const visibleMovies = movies.filter((m) => !m.is_dismissed);
 
   // Loading skeleton
@@ -99,9 +98,9 @@ export default function MovieRow({
               role="listitem">
               <MovieCard
                 movie={movie}
-                isSaved={movie.is_watchlisted} // ← already correct value
-                onDismiss={() => onDismiss?.(movie.id)} // ← only call parent
-                onWatchlistToggle={() => onWatchlistToggle?.(movie.id)} // ← only call parent
+                isSaved={movie.is_watchlisted}
+                onDismiss={() => onDismiss?.(movie.id)}
+                onWatchlistToggle={() => onWatchlistToggle?.(movie.id)}
               />
             </motion.div>
           ))}
