@@ -53,8 +53,8 @@ export default function HomeSection() {
 
   const heroMovies = (defaultDiscoverData?.results ?? []).slice(0, 3);
   const hiddenGems = visibleRowMovies.filter((m) => m.isHiddenGem);
-  const continueWatching = visibleRowMovies.slice(0, 5);
-  const vibeMovies = visibleRowMovies.slice(2, 8);
+  const continueWatching = visibleRowMovies.slice(0, 500);
+  const vibeMovies = visibleRowMovies.slice(2, 800);
 
   const handleDismiss = async (id: number) => {
     await memoryStore.dismissMovie(id, user?.id);

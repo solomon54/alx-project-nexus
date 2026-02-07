@@ -1,7 +1,7 @@
 //src/components/userProfile/ProfileSection.tsx
 "use client";
 
-import { useState } from "react"; 
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ProfileTabs from "./ProfileTabs";
 import ProfilePanel from "./ProfilePanel";
@@ -15,25 +15,16 @@ type SettingsTab = "profile" | "account" | "preferences";
 
 export default function ProfileSection() {
   const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
+
+  //  Single source of truth for Auth and Profile logic
   const { user } = useAuth();
   const { updateProfile, sendPasswordReset, loading, error } = useProfile();
 
+  // Prepare initial data from user_metadata
   const profileInitialData = {
     username: user?.username || "",
-
-    bio: (user as any)?.bio || "",
+    bio: user?.bio || "",
     avatar_url: user?.avatar_url || "",
-  };
-
-  const { user } = useAuth();
-
-  const { updateProfile, sendPasswordReset, loading, error } = useProfile();
-
-  // Prepare initial data
-  const profileInitialData = {
-    username: user?.user_metadata?.display_name || "",
-    bio: user?.user_metadata?.bio || "",
-    avatar_url: user?.user_metadata?.avatar_url || "",
   };
 
   return (
@@ -47,6 +38,7 @@ export default function ProfileSection() {
         </p>
       </header>
 
+      {/* Tabs Navigation */}
       <div className="sticky top-0 z-20 bg-black/80 backdrop-blur-md md:static md:bg-transparent mb-8 md:mb-12">
         <div className="max-w-2xl mx-auto">
           <ProfileTabs active={activeTab} onChange={setActiveTab} />
