@@ -1,147 +1,164 @@
-//src/components/auth/AuthSection.tsx
+// src/components/auth/AuthSection.tsx
 "use client";
 
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Loader2, ChevronRight, Github } from "lucide-react";
 import { AuthInput } from "@/components/ui/AuthInput";
 import { Button } from "@/components/ui/Button";
-import { Loader2 } from "lucide-react";
-
-type AuthMode = "login" | "signup";
-type AuthProvider = "email" | "google" | "guest";
+import { useAuth } from "@/contexts/AuthContext";
+import { useAuthForm, AuthMode } from "@/features/auth/useAuthForm";
 
 export const AuthSection = () => {
   const [mode, setMode] = useState<AuthMode>("signup");
-  const [isLoading, setIsLoading] = useState(false);
-
   const isSignup = mode === "signup";
+  const { signInWithGoogle, continueAsGuest } = useAuth();
+  const { errors, isLoading, handleAuthSubmit, validateField } =
+    useAuthForm(mode);
 
-  const simulateAuth = async (provider: AuthProvider) => {
-    setIsLoading(true);
-    console.log(`[AUTH] ${provider} authentication`);
-
-    await new Promise((resolve) => setTimeout(resolve, 1200));
-
-    setIsLoading(false);
-    alert(`${provider} auth simulated. Ready for backend.`);
-  };
+  const toggleMode = () =>
+    setMode((prev) => (prev === "signup" ? "login" : "signup"));
 
   return (
-    <section className="flex min-h-screen bg-cinema-black overflow-hidden">
-      {/* Desktop Visual */}
-      <div className="hidden lg:flex w-1/2 relative">
-        <img
-          src="/assets/fallback-backdrop.jpg"
-          alt="Cinematic background"
-          className="absolute inset-0 w-full h-full object-cover scale-105"
-        />
-        <div className="absolute inset-0 bg-cinema-black/70" />
-        <div className="absolute inset-0 bg-linear-to-r from-transparent to-cinema-black" />
+    <section className="flex min-h-screen bg-cinema-black overflow-hidden relative">
+      {/* Visual Side */}
+      <div className="hidden lg:flex w-1/2 relative border-r border-white/10">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="absolute inset-0 bg-[url('/assets/fallback-backdrop.jpg')] bg-cover bg-center">
+          <div className="absolute inset-0 bg-linear-to-tl from-cinema-black via-cinema-black/80 to-transparent" />
+        </motion.div>
 
-        <div className="relative z-10 flex flex-col justify-end p-16 pb-24">
-          <h2 className="font-bebas md:text-4xl xl:text-7xl leading-[0.8]">
-            UNLIMITED <br />
-            <span className="text-netflix-red">EXPERIENCES.</span>
-          </h2>
-          <p className="text-metadata-grey max-w-md text-xl mt-4">
-            Your universal watchlist,
-            <span className="text-white"> everywhere.</span>
+        <div className="relative z-10 self-end p-16 space-y-4">
+          <motion.h2
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="font-bebas text-7xl text-white leading-none">
+            EVERY STORY.
+            <br />
+            <span className="text-netflix-red">ONE PLACE.</span>
+          </motion.h2>
+          <p className="text-zinc-400 text-xl max-w-sm">
+            Access your curated cinematic library from any device.
           </p>
         </div>
       </div>
 
-      {/* Auth Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12">
-        <div className="w-full max-w-[400px] space-y-8">
-          <header className="text-center lg:text-left">
-            <h1 className="font-bebas text-6xl text-netflix-red">NEXUS</h1>
-            <p className="text-metadata-grey mt-2 text-sm uppercase tracking-widest">
-              {isSignup ? "Start your journey" : "Welcome back"}
+      {/* Form Side */}
+      <div className="flex-1 flex items-center justify-center p-8">
+        <motion.div
+          layout
+          className="w-full max-w-md space-y-8"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}>
+          <header className="space-y-2">
+            <h1 className="font-bebas text-5xl text-netflix-red tracking-tighter">
+              NEXUS
+            </h1>
+            <p className="text-zinc-500 uppercase tracking-[0.2em] text-xs font-bold">
+              {isSignup ? "Create your account" : "Welcome back, Captain"}
             </p>
           </header>
 
-          <form
-            className="space-y-5"
-            onSubmit={(e) => {
-              e.preventDefault();
-              simulateAuth("email");
-            }}>
-            {isSignup && (
-              <AuthInput label="Full Name" placeholder="John Doe" required />
-            )}
+          <form onSubmit={handleAuthSubmit} className="space-y-4">
+            <AnimatePresence mode="popLayout">
+              {isSignup && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}>
+                  <AuthInput
+                    label="Full Name"
+                    name="fullName"
+                    placeholder="Dominic Toretto"
+                    onChange={(e) => validateField("fullName", e.target.value)}
+                    error={errors.fullName}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             <AuthInput
               label="Email Address"
+              name="email"
               type="email"
-              placeholder="alex@prestige.com"
-              required
+              placeholder="name@domain.com"
+              onChange={(e) => validateField("email", e.target.value)}
+              error={errors.email}
             />
 
             <AuthInput
               label="Password"
+              name="password"
               type="password"
               placeholder="••••••••"
-              required
+              onChange={(e) => validateField("password", e.target.value)}
+              error={errors.password}
             />
 
+            {errors.general && (
+              <p className="text-red-500 text-sm bg-red-500/10 p-3 rounded-lg border border-red-500/20">
+                {errors.general}
+              </p>
+            )}
+
             <Button
+              type="submit"
               disabled={isLoading}
-              className="w-full py-4 text-lg font-bold bg-netflix-red hover:bg-red-700 flex justify-center">
+              className="w-full h-12 bg-netflix-red hover:bg-red-700 text-white font-bold transition-all">
               {isLoading ? (
-                <Loader2 className="animate-spin" />
+                <Loader2 className="animate-spin mx-auto" />
               ) : isSignup ? (
-                "Create Account"
+                "Sign Up"
               ) : (
                 "Sign In"
               )}
             </Button>
           </form>
 
-          <Divider />
+          <div className="relative py-4">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-white/30" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-cinema-black px-4 text-zinc-400">
+                Or continue with
+              </span>
+            </div>
+          </div>
 
-          <button
-            onClick={() => simulateAuth("google")}
-            disabled={isLoading}
-            className="w-full flex items-center justify-center gap-3 bg-white text-black font-bold py-3 rounded-lg hover:bg-zinc-200 transition active:scale-[0.98] disabled:opacity-50">
-            <GoogleIcon />
-            Continue with Google
-          </button>
-
-          <div className="text-center space-y-6 pt-6">
-            {/* Switch Auth Mode */}
-            <p className="text-sm text-metadata-grey">
-              {isSignup ? "Already have an account?" : "Don't have an account?"}{" "}
-              <button
-                disabled={isLoading}
-                onClick={() => setMode(isSignup ? "login" : "signup")}
-                className="text-netflix-red font-semibold text-base hover:underline transition-colors">
-                {isSignup ? "Log In" : "Sign Up"}
-              </button>
-            </p>
-
-            {/* Guest Access */}
+          <div className="grid grid-cols-2 gap-4">
             <button
-              onClick={() => simulateAuth("guest")}
-              className="text-electric-cyan text-base font-medium hover:brightness-125 transition-all border-b border-electric-cyan/30 pb-1">
-              Continue as Guest
+              onClick={() => signInWithGoogle()}
+              className="flex items-center justify-center gap-2 bg-white text-black py-2.5 rounded-lg font-bold hover:bg-zinc-200 transition">
+              <GoogleIcon /> Google
+            </button>
+            <button
+              onClick={() => {
+                continueAsGuest();
+                window.location.href = "/search";
+              }}
+              className="flex  items-center justify-center gap-2 bg-zinc-700 text-white py-2.5 rounded-lg font-bold hover:bg-zinc-800 border border-white/5 transition">
+              Guest Mode
             </button>
           </div>
-        </div>
+
+          <footer className="text-center">
+            <button
+              onClick={toggleMode}
+              className="text-zinc-300 hover:text-white transition text-sm">
+              {isSignup ? "Already have an account?" : "New to Nexus?"}
+              <span className="text-netflix-red font-bold ml-1 hover:underline">
+                {isSignup ? "Login" : "Sign up now"}
+              </span>
+            </button>
+          </footer>
+        </motion.div>
       </div>
     </section>
   );
 };
-
-/* ---- Small helpers (local, MVP-safe) ---- */
-
-const Divider = () => (
-  <div className="relative flex items-center py-2">
-    <div className="grow border-t border-white/10" />
-    <span className="mx-4 text-metadata-grey text-[10px] tracking-widest">
-      OR
-    </span>
-    <div className="grow border-t border-white/10" />
-  </div>
-);
 
 const GoogleIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24">
