@@ -2,13 +2,12 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   AlertCircle,
   Lock,
   Trash2,
   ShieldCheck,
-  CheckCircle2,
   Loader2,
   ChevronRight,
   Eye,
@@ -18,8 +17,21 @@ import { Button } from "@/components/ui/Button";
 import { useProfile } from "@/features/user/userProfile";
 import { cn } from "@/utils/classNames";
 
-export default function AccountPanel({ email = "user@example.com" }) {
+interface AccountPanelProps {
+  email?: string;
+  // FIXED: Changed from Promise<void> to accept the actual return type of your reset hook
+  onPasswordReset?: () => Promise<{ success: boolean } | undefined | void>;
+  isProcessing?: boolean;
+}
+
+export default function AccountPanel({
+  email = "user@example.com",
+  onPasswordReset,
+  isProcessing,
+}: AccountPanelProps) {
   const { changePasswordInternal, loading, error } = useProfile();
+
+  // UI States
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isChanging, setIsChanging] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -31,7 +43,7 @@ export default function AccountPanel({ email = "user@example.com" }) {
     if (newPassword.length < 6) return;
 
     const result = await changePasswordInternal(newPassword);
-    if (result.success) {
+    if (result?.success) {
       setIsSuccess(true);
       setNewPassword("");
       setShowPassword(false);
@@ -73,7 +85,7 @@ export default function AccountPanel({ email = "user@example.com" }) {
 
         <div
           className={cn(
-            "bg-zinc-900/40 border border-white/5 rounded-[2rem] transition-all duration-500",
+            "bg-zinc-900/40 border border-white/5 rounded-[2rem] transition-all duration-500 overflow-hidden",
             isChanging ? "p-6 ring-1 ring-white/10" : "p-2"
           )}>
           {!isChanging ? (
@@ -89,7 +101,7 @@ export default function AccountPanel({ email = "user@example.com" }) {
                     Change Password
                   </p>
                   <p className="text-[11px] text-zinc-500">
-                    Update your account security
+                    Directly update your security
                   </p>
                 </div>
               </div>
@@ -113,7 +125,6 @@ export default function AccountPanel({ email = "user@example.com" }) {
               <div className="relative group">
                 <input
                   autoFocus
-                  id="new-password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Minimum 6 characters"
                   value={newPassword}
@@ -123,13 +134,12 @@ export default function AccountPanel({ email = "user@example.com" }) {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition-colors"
-                  aria-label={showPassword ? "Hide password" : "Show password"}>
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white">
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
 
-              {/* Password Strength Indicator (Subtle) */}
+              {/* Password Strength */}
               <div className="flex gap-1 px-1">
                 {[1, 2, 3].map((i) => (
                   <div
@@ -145,7 +155,7 @@ export default function AccountPanel({ email = "user@example.com" }) {
               </div>
 
               {error && (
-                <div className="flex items-center gap-2 text-red-400 text-[10px] font-bold uppercase tracking-wider animate-shake">
+                <div className="flex items-center gap-2 text-red-400 text-[10px] font-bold uppercase tracking-wider">
                   <AlertCircle size={14} /> {error}
                 </div>
               )}
@@ -154,21 +164,29 @@ export default function AccountPanel({ email = "user@example.com" }) {
                 type="submit"
                 disabled={loading || newPassword.length < 6}
                 className={cn(
-                  "w-full py-4 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all duration-300",
+                  "w-full py-4 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all",
                   isSuccess
                     ? "bg-green-500 text-white"
-                    : "bg-electric-cyan text-black hover:shadow-[0_0_20px_rgba(0,255,242,0.15)]"
+                    : "bg-electric-cyan text-black"
                 )}>
                 {loading ? (
                   <Loader2 className="animate-spin mx-auto" size={16} />
                 ) : isSuccess ? (
-                  <div className="flex items-center gap-2 justify-center">
-                    <CheckCircle2 size={16} /> Password Updated
-                  </div>
+                  "Password Updated"
                 ) : (
                   "Update Now"
                 )}
               </Button>
+
+              <button
+                type="button"
+                onClick={onPasswordReset}
+                disabled={isProcessing}
+                className="w-full text-center text-[9px] font-black uppercase tracking-[0.2em] text-zinc-600 hover:text-zinc-400 pt-2 transition-colors disabled:opacity-50">
+                {isProcessing
+                  ? "Sending..."
+                  : "Lost access? Send reset email instead"}
+              </button>
             </form>
           )}
         </div>
@@ -197,12 +215,11 @@ export default function AccountPanel({ email = "user@example.com" }) {
               </h4>
             </div>
             <p className="text-xs text-zinc-400 leading-relaxed mb-6">
-              Deleting your account is permanent. All lists, reviews, and
-              progress will be{" "}
+              Deleting your account is permanent. All lists and progress will be{" "}
               <span className="text-red-500 font-bold italic">
                 permanently purged
-              </span>{" "}
-              from Nexus.
+              </span>
+              .
             </p>
             <div className="flex gap-3">
               <button
@@ -210,7 +227,7 @@ export default function AccountPanel({ email = "user@example.com" }) {
                 className="flex-1 bg-white/5 text-white hover:bg-white/10 rounded-xl py-3 text-[10px] font-black uppercase transition-colors">
                 Cancel
               </button>
-              <button className="flex-1 bg-red-600 hover:bg-red-700 text-white rounded-xl py-3 text-[10px] font-black uppercase transition-shadow hover:shadow-[0_0_20px_rgba(220,38,38,0.3)]">
+              <button className="flex-1 bg-red-600 hover:bg-red-700 text-white rounded-xl py-3 text-[10px] font-black uppercase">
                 Wipe Account
               </button>
             </div>
