@@ -1,14 +1,19 @@
-//src/types/user.ts
-export interface User {
-  id: string;
-  email: string;
-  username: string;
+// src/types/user.ts
+export interface UserMetadata {
+  username?: string;
+  display_name?: string;
   avatar_url?: string | null;
   bio?: string;
-  preferences?: {
-    onboarding_completed: boolean;
-    favorite_genres: number[];
-  };
+  onboarding_completed?: boolean;
+  favorite_genres?: number[];
+}
+
+export interface User {
+  id: string;
+  email?: string;
+  user_metadata: UserMetadata;
+  username?: string;
+  avatar_url?: string | null;
 }
 
 export interface AuthState {
