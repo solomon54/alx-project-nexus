@@ -1,3 +1,4 @@
+//src/contexts/AuthContext.tsx
 "use client";
 
 import {
@@ -47,7 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    // 1. Check for existing session on mount
+    //  Check for existing session on mount
     const initAuth = async () => {
       const {
         data: { session },
@@ -61,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     initAuth();
 
-    // 2. Listen for auth changes
+    //  Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {

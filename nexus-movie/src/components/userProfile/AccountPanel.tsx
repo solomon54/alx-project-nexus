@@ -19,7 +19,7 @@ import { cn } from "@/utils/classNames";
 
 interface AccountPanelProps {
   email?: string;
-  // FIXED: Changed from Promise<void> to accept the actual return type of your reset hook
+
   onPasswordReset?: () => Promise<{ success: boolean } | undefined | void>;
   isProcessing?: boolean;
 }

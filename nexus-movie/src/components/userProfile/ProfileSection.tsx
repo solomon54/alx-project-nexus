@@ -1,7 +1,7 @@
 //src/components/userProfile/ProfileSection.tsx
 "use client";
 
-import { useState } from "react";
+import { useState } from "react"; 
 import { motion, AnimatePresence } from "framer-motion";
 import ProfileTabs from "./ProfileTabs";
 import ProfilePanel from "./ProfilePanel";
@@ -23,6 +23,17 @@ export default function ProfileSection() {
 
     bio: (user as any)?.bio || "",
     avatar_url: user?.avatar_url || "",
+  };
+
+  const { user } = useAuth();
+
+  const { updateProfile, sendPasswordReset, loading, error } = useProfile();
+
+  // Prepare initial data
+  const profileInitialData = {
+    username: user?.user_metadata?.display_name || "",
+    bio: user?.user_metadata?.bio || "",
+    avatar_url: user?.user_metadata?.avatar_url || "",
   };
 
   return (
