@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { useFilteredMovies } from "@/features/movie-discovery/hooks/useFilteredMovies";
-import SearchHeader from "./SearchHeader";
+import AppHeader from "@/components/navigation/AppHeader";
 import FilterSidebar from "./FilterSidebar";
 import ResultsGrid from "./ResultsGrid";
 import FloatingFilterButton from "./FloatingFilterButton";
@@ -12,6 +12,7 @@ import MovieCardSkeleton from "@/components/ui/MovieCardSkeleton";
 import { useExploreFilters } from "@/features/movie-discovery/hooks/useExploreFilter";
 import { memoryStore } from "@/features/memory/memory.store";
 import { Movie } from "@/types/movie";
+import { X } from "lucide-react";
 
 export default function ExploreSection() {
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -21,7 +22,6 @@ export default function ExploreSection() {
   const { filters, setMood, toggleGenre, setDecade, reset } =
     useExploreFilters();
   const [isFilterModalOpen, setIsFilterModalOpen] = useState<boolean>(false);
-
   const [version, setVersion] = useState<number>(0);
 
   const { data, isLoading } = useFilteredMovies({
@@ -33,52 +33,59 @@ export default function ExploreSection() {
   });
 
   const rawMovies: Movie[] = data?.results ?? [];
+  const visibleMovies = rawMovies
+    .map((movie) => ({
+      ...movie,
+      is_dismissed: memoryStore.isDismissed(movie.id),
+      is_watchlisted: memoryStore.isWatchlisted(movie.id),
+    }))
+    .filter((m) => !m.is_dismissed);
 
-  const moviesWithState = rawMovies.map((movie) => ({
-    ...movie,
-    is_dismissed: memoryStore.isDismissed(movie.id),
-    is_watchlisted: memoryStore.isWatchlisted(movie.id),
-  }));
+  const activeFilterList = [
+    filters.mood,
+    ...filters.genres,
+    filters.decade?.toString(),
+  ].filter(Boolean) as string[];
 
-  // show only non-dismissed movies
-  const visibleMovies = moviesWithState.filter((m) => !m.is_dismissed);
-
-  const totalMatches = visibleMovies.length;
-
-  // Handlers
   const handleRemoveFilter = (filter: string) => {
     if (filter === filters.mood) setMood(undefined);
     else if (filters.genres.includes(filter)) toggleGenre(filter);
     else if (filters.decade?.toString() === filter) setDecade(undefined);
   };
 
-  const handleDismiss = (id: number) => {
-    memoryStore.dismissMovie(id);
-    setVersion((v) => v + 1);
-  };
-
-  const handleWatchlistToggle = (id: number) => {
-    if (memoryStore.isWatchlisted(id)) memoryStore.removeFromWatchlist(id);
-    else memoryStore.addToWatchlist(id);
-    setVersion((v) => v + 1);
-  };
-
   return (
-    <main className="min-h-screen bg-cinema-black text-white pb-24 md:pb-0 relative">
-      <SearchHeader
-        activeFilters={
-          [filters.mood, ...filters.genres, filters.decade?.toString()].filter(
-            Boolean
-          ) as string[]
-        }
-        onRemoveFilter={handleRemoveFilter}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-      />
+    <main className="min-h-screen bg-zinc-950 text-white pb-24 relative">
+      <AppHeader
+        query={searchQuery}
+        setQuery={setSearchQuery}
+        variant="explore"
+        searchPlaceholder="Filter by title, actor, or vibe...">
+        {activeFilterList.length > 0 && (
+          <div className="flex flex-wrap gap-2 items-center">
+            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mr-2">
+              Active Filters:
+            </span>
+            {activeFilterList.map((filter) => (
+              <button
+                key={filter}
+                onClick={() => handleRemoveFilter(filter)}
+                className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-electric-cyan/10 border border-electric-cyan/30 text-electric-cyan text-[10px] font-bold uppercase transition-all hover:bg-electric-cyan/20">
+                {filter}
+                <X size={10} />
+              </button>
+            ))}
+            <button
+              onClick={reset}
+              className="text-[10px] font-bold text-zinc-400 hover:text-white underline underline-offset-4 ml-2">
+              Clear All
+            </button>
+          </div>
+        )}
+      </AppHeader>
 
-      <div className="flex flex-col md:flex-row">
+      <div className="flex flex-col md:flex-row max-w-7xl mx-auto">
         {/* Desktop Sidebar */}
-        <aside className="hidden md:block w-80 lg:w-96 border-r border-surface-grey/50 p-6 sticky top-16 self-start">
+        <aside className="hidden md:block w-72 lg:w-80 border-r border-white/5 p-6 sticky top-[120px] self-start h-[calc(100vh-120px)] overflow-y-auto">
           <FilterSidebar
             mood={filters.mood}
             genres={filters.genres}
@@ -93,79 +100,79 @@ export default function ExploreSection() {
         </aside>
 
         {/* Main Content */}
-        <div className="flex-1 p-4 md:p-6 lg:p-8">
-          <div
-            className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4"
-            aria-live="polite">
-            <p className="text-metadata-grey text-sm md:text-base">
-              {isLoading
-                ? "Discovering movies..."
-                : `${totalMatches} ${
-                    totalMatches === 1 ? "movie" : "movies"
-                  } match your vibe`}
-            </p>
+        <div className="flex-1 p-4 md:p-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+            <div>
+              <h1 className="text-2xl font-black uppercase tracking-tighter mb-1">
+                Explore
+              </h1>
+              <p className="text-zinc-500 text-xs font-medium">
+                {isLoading
+                  ? "Curating selection..."
+                  : `${visibleMovies.length} matches found`}
+              </p>
+            </div>
 
-            <div className="flex items-center gap-3">
-              <label
-                htmlFor="sort-explore"
-                className="text-sm text-metadata-grey">
-                Sort by
-              </label>
+            <div className="flex items-center gap-3 bg-zinc-900/50 p-1 pl-4 rounded-xl border border-white/5">
+              <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                Sort By
+              </span>
               <select
-                id="sort-explore"
                 value={sortBy}
-                onChange={(e) =>
-                  setSortBy(
-                    e.target.value as "match" | "release" | "popularity"
-                  )
-                }
-                className="bg-surface-grey border border-surface-grey/50 rounded-lg px-4 py-2 text-white text-sm focus:outline-none focus:border-electric-cyan">
-                <option value="match">Match Score</option>
-                <option value="release">Release Date</option>
-                <option value="popularity">Popularity</option>
+                onChange={(e) => setSortBy(e.target.value as any)}
+                className="bg-transparent text-white text-[10px] font-black uppercase tracking-widest focus:outline-none cursor-pointer p-2">
+                <option value="match" className="bg-zinc-900">
+                  Match
+                </option>
+                <option value="release" className="bg-zinc-900">
+                  Newest
+                </option>
+                <option value="popularity" className="bg-zinc-900">
+                  Popular
+                </option>
               </select>
             </div>
           </div>
 
           {isLoading ? (
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-              {Array.from({ length: 12 }).map((_, i) => (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+              {Array.from({ length: 10 }).map((_, i) => (
                 <MovieCardSkeleton key={i} variant="grid" />
               ))}
             </div>
           ) : visibleMovies.length === 0 ? (
-            <div className="text-center py-20 text-zinc-400">
-              <p className="text-xl font-medium mb-3">No matches found</p>
-              <p className="text-sm max-w-md mx-auto">
-                Try adjusting your mood filter, search term, or clear some
-                selections.
+            <div className="text-center py-32 border-2 border-dashed border-white/5 rounded-3xl">
+              <p className="text-zinc-500 font-black uppercase tracking-[0.2em] text-sm">
+                No Results Found
               </p>
             </div>
           ) : (
             <ResultsGrid
               movies={visibleMovies}
-              onDismiss={handleDismiss}
-              onWatchlistToggle={handleWatchlistToggle}
+              onDismiss={(id) => {
+                memoryStore.dismissMovie(id);
+                setVersion((v) => v + 1);
+              }}
+              onWatchlistToggle={(id) => {
+                memoryStore.isWatchlisted(id)
+                  ? memoryStore.removeFromWatchlist(id)
+                  : memoryStore.addToWatchlist(id);
+                setVersion((v) => v + 1);
+              }}
             />
           )}
         </div>
       </div>
 
-      {/* Mobile filter trigger */}
       <FloatingFilterButton
-        activeCount={
-          (filters.mood ? 1 : 0) +
-          filters.genres.length +
-          (filters.decade ? 1 : 0)
-        }
+        activeCount={activeFilterList.length}
         onClick={() => setIsFilterModalOpen(true)}
       />
 
-      {/* Mobile filter modal */}
       <Modal
         isOpen={isFilterModalOpen}
         onClose={() => setIsFilterModalOpen(false)}
-        title="Filters">
+        title="Refine Search">
         <FilterSidebar
           mood={filters.mood}
           genres={filters.genres}
