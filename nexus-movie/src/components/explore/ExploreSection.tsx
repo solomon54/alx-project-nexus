@@ -134,8 +134,9 @@ export default function ExploreSection() {
             </div>
           </div>
 
+          {/* movie grid or loading skeletons */}
           {isLoading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            <div className="grid grid-cols-2 gap-6  xl:grid-cols-3">
               {Array.from({ length: 10 }).map((_, i) => (
                 <MovieCardSkeleton key={i} variant="grid" />
               ))}

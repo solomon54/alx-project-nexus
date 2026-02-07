@@ -45,16 +45,15 @@ export default function FilterSidebar({
     "Adventure",
   ];
 
-  // ✨ Draft states for temporary selections
   const [draftMood, setDraftMood] = useState(mood);
   const [draftGenres, setDraftGenres] = useState([...genres]);
-  const [draftDecade, setDraftDecade] = useState(decade ?? 2020);
 
-  // When parent resets, also reset drafts
+  // Initialize the decade
+  const [draftDecade, setDraftDecade] = useState(decade ?? 2020);
   const handleReset = () => {
     setDraftMood(undefined);
     setDraftGenres([]);
-    setDraftDecade(2020);
+    setDraftDecade(2020); // Reset to a year that actually has many movies
     onReset?.();
   };
 
@@ -71,7 +70,7 @@ export default function FilterSidebar({
               className={cn(
                 "px-4 py-2 rounded-full text-sm font-medium transition-all duration-200",
                 draftMood === m
-                  ? "bg-netflix-red/80 text-white shadow-sm"
+                  ? "bg-netflix-red text-white shadow-sm"
                   : "bg-surface-grey/70 text-metadata-grey hover:text-white"
               )}
               onClick={() => setDraftMood(draftMood === m ? undefined : m)}>
@@ -92,7 +91,7 @@ export default function FilterSidebar({
               className={cn(
                 "px-4 py-2 rounded-full text-sm font-medium transition-all duration-200",
                 draftGenres.includes(g)
-                  ? "bg-netflix-red/80 text-white shadow-sm"
+                  ? "bg-netflix-red text-white shadow-sm"
                   : "bg-surface-grey/70 text-metadata-grey hover:text-white"
               )}
               onClick={() =>
@@ -108,9 +107,11 @@ export default function FilterSidebar({
         </div>
       </div>
 
-      {/* Decade */}
+      {/* Decade - FIXED RANGE AND STEP */}
+
       <div>
         <h3 className="text-lg font-bebas mb-4">Release Decade</h3>
+
         <input
           type="range"
           min={1970}
@@ -120,9 +121,12 @@ export default function FilterSidebar({
           onChange={(e) => setDraftDecade(Number(e.target.value))}
           className="w-full transition-all duration-300 ease-in-out"
         />
+
         <div className="flex justify-between text-sm text-metadata-grey mt-2">
           <span>1970</span>
+
           <span>{draftDecade}</span>
+
           <span>2025</span>
         </div>
       </div>
@@ -136,15 +140,21 @@ export default function FilterSidebar({
           variant="primary"
           className="flex-1"
           onClick={() => {
-            if (draftMood !== undefined) onToggleMood(draftMood);
-            draftGenres.forEach((g) => {
-              if (!genres.includes(g)) onToggleGenre(g);
-            });
+            //  Mood
+            if (draftMood !== mood) {
+              onToggleMood(draftMood || "");
+            }
 
-            genres.forEach((g) => {
-              if (!draftGenres.includes(g)) onToggleGenre(g);
-            });
+            //  Genres (Toggle off what was removed, toggle on what was added)
+            const added = draftGenres.filter((g) => !genres.includes(g));
+            const removed = genres.filter((g) => !draftGenres.includes(g));
+
+            added.forEach((g) => onToggleGenre(g));
+            removed.forEach((g) => onToggleGenre(g));
+
+            //  Decade
             onChangeDecade(draftDecade);
+
             onApply?.();
           }}>
           Apply
