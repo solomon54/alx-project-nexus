@@ -57,9 +57,8 @@ interface TMDBMovieResponse {
   };
 }
 
-/**
- * 2. SERVICE CONFIGURATION
- */
+//SERVICE CONFIGURATION
+
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 const IMAGE_BASE_URL =
   process.env.NEXT_PUBLIC_TMDB_IMAGE_BASE_URL || "https://image.tmdb.org/t/p/";
@@ -75,9 +74,8 @@ const genreToMoodMap: Record<number, string> = {
   10751: "Family-Friendly",
 };
 
-/**
- * 3. HELPERS & MAPPER
- */
+//HELPERS & MAPPER
+
 export const getTMDBImage = (path: string | null, size: string = "w500") =>
   path ? `${IMAGE_BASE_URL}${size}${path}` : "/placeholder-poster.jpg";
 
@@ -143,9 +141,9 @@ export function mapTMDBMovie(tmdbMovie: TMDBMovieResponse): Movie {
     isHiddenGem: undefined,
   };
 }
-/**
- * 4. FETCHERS
- */
+
+// FETCHERS
+
 export async function fetchMovieDetails(
   movieId: number
 ): Promise<Movie | null> {
@@ -172,9 +170,45 @@ export async function fetchMovieDetails(
   }
 }
 
-/**
- * 5. LIST FETCHERS (Trending / Discovery)
- */
+export async function searchMovies(query: string): Promise<Movie[]> {
+  if (!query) return [];
+
+  const options = {
+    method: "GET",
+    headers: {
+      accept: "application/json",
+      Authorization: `Bearer ${process.env.TMDB_READ_ACCESS_TOKEN}`,
+    },
+  };
+
+  try {
+    const res = await fetch(
+      `${TMDB_BASE_URL}/search/movie?query=${encodeURIComponent(
+        query
+      )}&include_adult=false&language=en-US&page=1`,
+      options
+    );
+
+    if (!res.ok) throw new Error("Search API failed");
+
+    const data = await res.json();
+
+    // Map top 10 results to full details to get providers/credits
+    const detailedMovies = await Promise.all(
+      data.results
+        .slice(0, 10)
+        .map((m: { id: number }) => fetchMovieDetails(m.id))
+    );
+
+    return detailedMovies.filter((m): m is Movie => m !== null);
+  } catch (err) {
+    console.error("Error searching TMDB:", err);
+    return [];
+  }
+}
+
+//LIST FETCHERS (Trending / Discovery)
+
 export async function fetchTrendingMovies(): Promise<Movie[]> {
   const options = {
     method: "GET",
@@ -185,15 +219,12 @@ export async function fetchTrendingMovies(): Promise<Movie[]> {
   };
 
   try {
-    // 1. Get the trending list
-    // Inside fetchTrendingMovies in src/lib/tmdb.ts
     const res = await fetch(
       `${TMDB_BASE_URL}/trending/movie/day?language=en-US`,
       options
     );
 
     if (!res.ok) {
-      // Add this log to see the real error code
       console.error("TMDB Error Status:", res.status);
       const errorText = await res.text();
       console.error("TMDB Error Message:", errorText);
@@ -201,7 +232,7 @@ export async function fetchTrendingMovies(): Promise<Movie[]> {
     }
     const listData = await res.json();
 
-    // 2. Map the IDs to full movie details
+    //  Map the IDs to full movie details
     const detailedMovies = await Promise.all(
       listData.results
         .slice(0, 20)

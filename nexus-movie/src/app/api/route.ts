@@ -1,3 +1,4 @@
+//src/app/api/route.ts
 import { NextResponse } from "next/server";
 import { fetchTrendingMovies } from "@/lib/tmdb";
 

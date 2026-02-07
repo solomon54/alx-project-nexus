@@ -1,5 +1,4 @@
 // src/features/movie-discovery/hooks/useMovies.ts
-// src/features/movie-discovery/hooks/useMovies.ts
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
@@ -27,7 +26,7 @@ export const useDiscoverMovies = (mood?: DiscoveryMood) => {
         ...movie,
       }));
 
-      // 2. Apply your existing Mood logic
+      // 2. Apply  existing Mood logic
       if (mood) {
         results = results
           .map((movie) => {
@@ -40,7 +39,7 @@ export const useDiscoverMovies = (mood?: DiscoveryMood) => {
           .sort((a, b) => (b.moodScore ?? 0) - (a.moodScore ?? 0));
       }
 
-      // 3. Apply your Hidden Gem logic
+      // 3. Apply Hidden Gem logic
       results = results.map((movie) => ({
         ...movie,
         isHiddenGem: calculateHiddenGemScore(movie).isHiddenGem,
