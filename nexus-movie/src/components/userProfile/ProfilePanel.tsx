@@ -1,9 +1,10 @@
+//src/components/userProfile/ProfilePanel.tsx
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import Image from "next/image";
-import { User, Camera, AlertCircle, Loader2 } from "lucide-react";
-import { motion } from "framer-motion";
+import { User, Camera, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/utils/classNames";
 
@@ -13,160 +14,208 @@ interface ProfileFormData {
 }
 
 interface ProfilePanelProps {
-  initialData?: Partial<ProfileFormData>;
-  onSubmit?: (data: ProfileFormData, imageFile: File | null) => void;
+  initialData?: Partial<ProfileFormData> & { avatar_url?: string };
+  onSubmit?: (data: ProfileFormData, imageFile: File | null) => Promise<any>;
   isSubmitting?: boolean;
   error?: string | null;
 }
 
 export default function ProfilePanel({
-  initialData = { username: "", bio: "" },
+  initialData,
   onSubmit,
   isSubmitting = false,
   error = null,
 }: ProfilePanelProps) {
+  // --- STATE INITIALIZATION ---
   const [formData, setFormData] = useState<ProfileFormData>({
-    username: initialData.username || "",
-    bio: initialData.bio || "",
+    username: initialData?.username || "",
+    bio: initialData?.bio || "",
   });
 
-  // Image Preview Logic
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(
+    initialData?.avatar_url || null
+  );
+
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isSuccess, setIsSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [touched, setTouched] = useState<{ [key: string]: boolean }>({});
+  useEffect(() => {
+    if (initialData) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setFormData({
+        username: initialData.username || "",
+        bio: initialData.bio || "",
+      });
+      if (initialData.avatar_url) setPreviewUrl(initialData.avatar_url);
+    }
+  }, [initialData?.username, initialData?.bio, initialData?.avatar_url]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > 2 * 1024 * 1024) return alert("File too large. Max 2MB.");
       setSelectedFile(file);
-      // Create local URL for immediate UI feedback
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
+      return () => URL.revokeObjectURL(url);
     }
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (onSubmit) onSubmit(formData, selectedFile);
+    if (onSubmit) {
+      const result = await onSubmit(formData, selectedFile);
+      if (result === true || result?.success) {
+        setIsSuccess(true);
+        setTimeout(() => setIsSuccess(false), 3000);
+      }
+    }
   };
 
-  const getInputClasses = (field: keyof ProfileFormData) =>
-    cn(
-      "w-full bg-zinc-800/40 border border-white/20 rounded-xl px-4 py-3 text-white text-sm md:text-base",
-      "placeholder:text-zinc-500 transition-all duration-200",
-      "focus:outline-none focus:border-electric-cyan focus:ring-1 focus:ring-electric-cyan/20",
-      "disabled:opacity-60",
-      touched[field] && !formData[field] && "border-red-500/50"
-    );
+  const inputClasses = cn(
+    "w-full bg-zinc-900/50 border border-white/10 rounded-2xl px-4 py-4 text-white text-sm transition-all outline-none",
+    "focus:border-electric-cyan focus:ring-4 focus:ring-electric-cyan/10",
+    "placeholder:text-zinc-600"
+  );
 
   return (
     <motion.form
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       onSubmit={handleSubmit}
-      className="max-w-2xl mx-auto space-y-6 md:space-y-8"
-      noValidate>
-      {/* Avatar Section  */}
-      <section className="flex flex-col items-center gap-4 py-4 md:pb-8 border-b border-white/10">
-        <div className="relative group">
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileChange}
-            accept="image/*"
-            className="hidden"
-            title="Upload profile picture"
-          />
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className={cn(
-              "w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden bg-zinc-800 border-2 border-electric-cyan/50 relative shadow-xl",
-              "hover:border-electric-cyan transition-all active:scale-95"
-            )}>
+      className="space-y-8">
+      {/* Avatar Section */}
+      <div className="flex flex-col items-center space-y-4">
+        <button
+          type="button"
+          aria-label="Upload profile picture"
+          className="relative group w-32 h-32"
+          onClick={() => fileInputRef.current?.click()}>
+          <div className="w-full h-full rounded-full overflow-hidden border-2 border-white/10 group-hover:border-electric-cyan transition-all duration-300 bg-zinc-800 flex items-center justify-center relative">
             {previewUrl ? (
               <Image
                 src={previewUrl}
-                alt="Preview"
+                alt="Profile Preview"
                 fill
                 className="object-cover"
+                unoptimized
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <User size={40} className="text-zinc-500" />
-              </div>
+              <User size={48} className="text-zinc-600" />
             )}
-
-            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-              <Camera size={20} className="text-white" />
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300">
+              <Camera size={28} className="text-white" />
             </div>
-          </button>
-        </div>
+          </div>
 
-        <div className="text-center">
-          <h3 className="text-lg md:text-xl font-bold text-white tracking-tight">
-            Profile Picture
-          </h3>
-          <p className="text-xs text-zinc-400 mt-1">Tap to change avatar</p>
-        </div>
-      </section>
+          <div className="absolute -bottom-1 -right-1 bg-zinc-900 border border-white/30 p-2 rounded-full shadow-xl text-zinc-300 group-hover:text-electric-cyan transition-colors">
+            <Camera size={14} />
+          </div>
+        </button>
 
-      {/* Form Fields  */}
-      <div className="space-y-5 md:space-y-6">
-        <div className="space-y-1.5">
-          <label className="text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-300 ml-1">
-            Username
+        <input
+          id="avatar-upload"
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          accept="image/*"
+          className="hidden"
+          aria-hidden="true"
+        />
+        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
+          Upload Identity
+        </span>
+      </div>
+
+      <div className="space-y-6">
+        {/* Display Name Field */}
+        <div className="space-y-2">
+          <label
+            htmlFor="username"
+            className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1 block">
+            Display Name
           </label>
           <input
-            name="username"
+            id="username"
+            type="text"
+            required
             value={formData.username}
-            onChange={handleChange}
-            onBlur={() => setTouched({ ...touched, username: true })}
-            placeholder="MovieBuff99"
-            className={getInputClasses("username")}
+            onChange={(e) =>
+              setFormData({ ...formData, username: e.target.value })
+            }
+            placeholder="Username"
+            className={inputClasses}
           />
         </div>
 
-        <div className="space-y-1.5">
-          <label className="text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-300 ml-1">
+        {/* Bio Field */}
+        <div className="space-y-2">
+          <label
+            htmlFor="bio"
+            className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1 block">
             Bio
           </label>
-          <textarea
-            name="bio"
-            value={formData.bio}
-            onChange={handleChange}
-            placeholder="I love hidden gems and 70s thrillers..."
-            rows={3}
-            className={cn(getInputClasses("bio"), "resize-none")}
-          />
-          <div className="flex justify-end text-[10px] text-zinc-500 pr-1">
-            {formData.bio.length}/280
+          <div className="relative">
+            <textarea
+              id="bio"
+              value={formData.bio}
+              onChange={(e) =>
+                setFormData({ ...formData, bio: e.target.value.slice(0, 160) })
+              }
+              placeholder="Tell us about your movie taste..."
+              rows={4}
+              className={cn(inputClasses, "resize-none")}
+            />
+            <div
+              className={cn(
+                "absolute bottom-4 right-4 text-[10px] font-mono font-bold",
+                formData.bio.length >= 150 ? "text-orange-500" : "text-zinc-600"
+              )}
+              aria-live="polite">
+              {formData.bio.length}/160
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Action Button */}
-      <div className="pt-2">
-        <Button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full rounded-xl py-4 font-bold text-sm uppercase tracking-widest bg-white text-black hover:bg-electric-cyan hover:text-black transition-colors">
-          {isSubmitting ? (
-            <Loader2 className="animate-spin mx-auto" size={20} />
-          ) : (
-            "Save Changes"
-          )}
-        </Button>
-      </div>
+      {/* Error Message */}
+      <AnimatePresence mode="wait">
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="flex items-center gap-3 text-red-400 text-xs bg-red-400/5 p-4 rounded-2xl border border-red-400/10"
+            role="alert">
+            <AlertCircle size={16} />
+            <span className="font-medium">{error}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <Button
+        type="submit"
+        disabled={isSubmitting}
+        className={cn(
+          "w-full py-6 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] transition-all duration-500",
+          isSuccess
+            ? "bg-green-500 text-white"
+            : "bg-electric-cyan text-black hover:scale-[1.02] active:scale-[0.98] hover:shadow-[0_0_30px_rgba(0,255,242,0.2)]"
+        )}>
+        {isSubmitting ? (
+          <Loader2 className="animate-spin" size={20} />
+        ) : isSuccess ? (
+          <motion.div
+            initial={{ scale: 0.5 }}
+            animate={{ scale: 1 }}
+            className="flex items-center gap-2">
+            <CheckCircle2 size={18} /> Sync Complete
+          </motion.div>
+        ) : (
+          "Update Profile"
+        )}
+      </Button>
     </motion.form>
   );
 }
