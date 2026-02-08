@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Nexus Movie — Offline</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="apple-touch-icon" sizes="192x192" href="/icon-192x192.png" />
+    <link rel="icon" sizes="512x512" href="/icon-512x512.png" />
+
+    <style>
+        /* Reset + mobile-first */
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: system-ui, sans-serif;
+            background: #000;
+            color: #fff;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        h1 {
+            color: #00ffff;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            color: #cbd5e1;
+            /* slate-300 */
+            margin-bottom: 1.5rem;
+        }
+
+        p {
+            color: #94a3b8;
+            /* slate-400 */
+            margin: 0.25rem 0;
+        }
+
+        .buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+
+        .button {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1.5rem;
+            font-weight: 600;
+            border-radius: 9999px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .btn-home {
+            background: #0f172a;
+            /* slate-900 */
+            border: 1px solid #00ffff;
+            color: #00ffff;
+        }
+
+        .btn-home:hover {
+            background: #0f172a;
+            color: #06b6d4;
+            /* cyan-400 */
+        }
+
+        .btn-reload {
+            background: #06b6d4;
+            /* cyan-500 */
+            color: #000;
+        }
+
+        .btn-reload:hover {
+            background: #22d3ee;
+            /* cyan-400 */
+        }
+
+        img.screenshot {
+            max-width: 90%;
+            height: auto;
+            margin-top: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 255, 255, 0.3);
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (min-width: 640px) {
+            h1 {
+                font-size: 4rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🎬 You’re Offline</h1>
+    <h2>Nexus Movie will reconnect automatically.</h2>
+    <p>Your saved library is still accessible.</p>
+
+    <div class="buttons">
+        <a href="/" class="button btn-home">🏠 Home</a>
+        <button class="button btn-reload" onclick="location.reload()">🔄 Retry</button>
+    </div>
+
+    <img class="screenshot" src="/screens/MobileFirstPWA-mob.png" alt="Offline Nexus Preview" />
+</body>
+
+</html>
