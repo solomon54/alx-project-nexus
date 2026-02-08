@@ -41,7 +41,7 @@ export const mockMovies: Movie[] = [
           id: 1245,
           name: "Emily Blunt",
           character: "Kitty Oppenheimer",
-          profile_path: "/some-real-path.jpg", // Replace with actual if you have it
+          profile_path: "/some-real-path.jpg",
         },
         {
           id: 74568,
@@ -70,7 +70,7 @@ export const mockMovies: Movie[] = [
       {
         provider_id: 119,
         provider_name: "Prime Video",
-        logo_path: "/p3z3l8m8x9r9q9s9t9u9v9w9x9y9z.jpg", // placeholder; real often /seGSXajazLMCKGB5hnRCidtjay1.jpg
+        logo_path: "/p3z3l8m8x9r9q9s9t9u9v9w9x9y9z.jpg",
         deep_link: "https://www.primevideo.com/detail/Oppenheimer/0...",
         monetization_type: "rent",
       } satisfies Provider,
