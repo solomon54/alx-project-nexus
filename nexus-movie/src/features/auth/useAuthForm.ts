@@ -63,7 +63,6 @@ export const useAuthForm = (mode: AuthMode) => {
       const redirectTo = sessionStorage.getItem("redirectTo") || "/library";
       sessionStorage.removeItem("redirectTo");
       window.location.href = redirectTo;
-      state;
     } catch (err: any) {
       const msg = err.message.toLowerCase();
       if (msg.includes("email already") || msg.includes("registered")) {

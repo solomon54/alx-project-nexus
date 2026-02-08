@@ -42,8 +42,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         supabaseUser.email?.split("@")[0] ||
         "User",
       avatar_url: supabaseUser.user_metadata?.avatar_url || null,
-
       bio: supabaseUser.user_metadata?.bio || "",
+      user_metadata: supabaseUser.user_metadata || {},
     };
   }, []);
 

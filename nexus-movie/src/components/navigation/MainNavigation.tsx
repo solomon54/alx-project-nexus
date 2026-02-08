@@ -7,7 +7,7 @@ import { Home, Search, Bookmark, User, Clapperboard } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/utils/classNames";
 
-const footerTab = [
+const MainNavigation = [
   { name: "Home", href: "/", icon: Home },
   { name: "Explore", href: "/search", icon: Search },
   { name: "My Library", href: "/library", icon: Bookmark },
@@ -23,7 +23,7 @@ export default function Navbar() {
       <nav className="fixed bottom-0 left-0 right-0 z-50 block sm:hidden">
         <div className="bg-black/80 backdrop-blur-xl border-t border-white/10 px-6 py-3 pb-6">
           <div className="flex justify-between items-center">
-            {footerTab.map((item) => {
+            {MainNavigation.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Link
@@ -74,7 +74,7 @@ export default function Navbar() {
         </div>
 
         <div className="flex-1 px-4 py-10 space-y-4">
-          {footerTab.map((item) => {
+          {MainNavigation.map((item) => {
             const isActive = pathname === item.href;
             return (
               <Link
