@@ -4,7 +4,7 @@
 
 > To understand the full scope of the Nexus platform, please refer to the following specialized documents:
 
-- [🚀 Product Requirements Document (PRD)](./PRD.md) – _All About Problem Statement, Goals, and User Pain Points.._(See below)
+- [🚀 Product Requirements Document (PRD)](./README.md) – _All About Problem Statement, Goals, and User Pain Points.._(See below)
 - [💻 Technical Architecture](./README.md) – _Deep dive into the Technical details, Folder structure, Tech stack, and Installation.._
 
 ![Home Page](./PWAHomeDashboard.png)
