@@ -15,6 +15,13 @@ import { decideMovie } from "@/features/movie-discovery/logic/movieDecision.logi
 import { memoryStore } from "@/features/memory/memory.store";
 import { useAuth } from "@/contexts/AuthContext";
 
+const FEATURED_HERO_BACKDROPS = [
+  "/zGoZB4CboMzY1z4G3nU6BWnMDB2.jpg",
+  "/oD3Eey4e4Z259XLm3eD3WGcoJAh.jpg",
+  "/klvZs66SG19qmacdwxSRkdFQhQS.jpg",
+  "/cWsBscZzwu5brg9YjNkGewRUvJX.jpg",
+];
+
 export default function HomeSection() {
   const { user, isGuest } = useAuth();
   const [activeMood, setActiveMood] = useState<DiscoveryMood | undefined>();
@@ -50,11 +57,27 @@ export default function HomeSection() {
   const visibleRowMovies = processedMovies.filter(
     (m) => m.decision !== "dismissed"
   );
+  const heroMovies = useMemo(() => {
+    const allMovies = defaultDiscoverData?.results ?? [];
 
-  const heroMovies = (defaultDiscoverData?.results ?? []).slice(0, 3);
-  const hiddenGems = visibleRowMovies.filter((m) => m.isHiddenGem);
-  const continueWatching = visibleRowMovies.slice(0, 5);
-  const vibeMovies = visibleRowMovies.slice(2, 8);
+    const matched = allMovies.filter((m) => {
+      const path = m.backdrop_path || m.poster_path;
+      return path ? FEATURED_HERO_BACKDROPS.includes(path) : false;
+    });
+
+    if (matched.length > 0) return matched;
+    return allMovies.filter((m) => !memoryStore.isDismissed(m.id)).slice(0, 4);
+  }, [defaultDiscoverData]);
+
+  // Expanded content for the rows
+  const hiddenGems = useMemo(() => {
+    return visibleRowMovies.filter(
+      (m) => m.isHiddenGem || m.vote_average > 7.2
+    );
+  }, [visibleRowMovies]);
+
+  const continueWatching = visibleRowMovies;
+  const vibeMovies = visibleRowMovies;
 
   const handleDismiss = async (id: number) => {
     await memoryStore.dismissMovie(id, user?.id);

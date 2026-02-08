@@ -1,9 +1,9 @@
-// src/components/shared/SearchCombobox.tsx   ← new shared file
+//src/components/shared/SearchComboBox.tsx
 "use client";
 
 import { useMovieSearch } from "@/features/movie-discovery/hooks/useMovieSearch";
 import { cn } from "@/utils/classNames";
-import { Search, X } from "lucide-react";
+import { Search, X, Loader2 } from "lucide-react";
 import { useState, useRef, useEffect, KeyboardEvent } from "react";
 import { Movie } from "@/types/movie";
 
@@ -19,22 +19,25 @@ interface SearchComboboxProps {
 export default function SearchCombobox({
   query,
   setQuery,
-  placeholder = "Search movies, shows, genres...",
+  placeholder = "Search movies, moods, or people...",
   className = "",
   inputClassName = "",
   showClearButton = true,
 }: SearchComboboxProps) {
   const [inputValue, setInputValue] = useState(query);
-  const { data } = useMovieSearch(inputValue);
-  const results: Movie[] = Array.isArray(data)
-    ? data
-    : (data as any)?.results ?? [];
-
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
 
+  // useMovieSearch now handles debouncing internally
+  const { data: results = [], isLoading } = useMovieSearch(inputValue);
+
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Sync internal state if query prop changes externally
+  useEffect(() => {
+    setInputValue(query);
+  }, [query]);
 
   // Close on outside click
   useEffect(() => {
@@ -46,76 +49,72 @@ export default function SearchCombobox({
         !inputRef.current.contains(e.target as Node)
       ) {
         setIsOpen(false);
-        setHighlightedIndex(-1);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Auto open/close dropdown
+  // Control dropdown visibility
   useEffect(() => {
-    if (inputValue.trim() && results.length > 0) {
+    if (inputValue.trim().length > 1 && (results.length > 0 || isLoading)) {
       setIsOpen(true);
-    } else {
+    } else if (inputValue.trim().length <= 1) {
       setIsOpen(false);
     }
     setHighlightedIndex(-1);
-  }, [inputValue, results.length]);
+  }, [inputValue, results.length, isLoading]);
 
-  // Commit only on explicit action
   const commitSearch = (value: string) => {
     const trimmed = value.trim();
     setQuery(trimmed);
     setInputValue(trimmed);
     setIsOpen(false);
-    setHighlightedIndex(-1);
     inputRef.current?.blur();
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (!isOpen && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
-      e.preventDefault();
-      setIsOpen(true);
-      setHighlightedIndex(e.key === "ArrowDown" ? 0 : results.length - 1);
-      return;
-    }
+    if (!isOpen) return;
 
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setHighlightedIndex((prev) => (prev + 1) % results.length);
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setHighlightedIndex((prev) =>
-        prev <= 0 ? results.length - 1 : prev - 1
-      );
-    } else if (e.key === "Enter") {
-      e.preventDefault();
-      if (highlightedIndex >= 0 && isOpen) {
-        commitSearch(results[highlightedIndex].title);
-      } else {
-        commitSearch(inputValue);
-      }
-    } else if (e.key === "Escape") {
-      e.preventDefault();
-      setIsOpen(false);
-      setHighlightedIndex(-1);
-      inputRef.current?.blur();
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        setHighlightedIndex((prev) => (prev + 1) % results.length);
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        setHighlightedIndex((prev) =>
+          prev <= 0 ? results.length - 1 : prev - 1
+        );
+        break;
+      case "Enter":
+        e.preventDefault();
+        if (highlightedIndex >= 0 && results[highlightedIndex]) {
+          commitSearch(results[highlightedIndex].title);
+        } else {
+          commitSearch(inputValue);
+        }
+        break;
+      case "Escape":
+        setIsOpen(false);
+        inputRef.current?.blur();
+        break;
     }
   };
-
-  const handleSuggestionClick = (movie: Movie) => {
-    commitSearch(movie.title);
-  };
-
-  const listboxId = "shared-search-suggestions";
 
   return (
-    <div className={cn("relative flex-1", className)}>
-      <Search
-        className="absolute left-4 top-1/2 -translate-y-1/2 text-metadata-grey pointer-events-none"
-        size={20}
-      />
+    <div className={cn("relative flex-1 group", className)}>
+      {/* Search/Loading Icon */}
+      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-metadata-grey z-10">
+        {isLoading ? (
+          <Loader2 className="animate-spin text-electric-cyan" size={18} />
+        ) : (
+          <Search
+            size={18}
+            className="group-focus-within:text-electric-cyan transition-colors"
+          />
+        )}
+      </div>
 
       <input
         ref={inputRef}
@@ -124,20 +123,12 @@ export default function SearchCombobox({
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
         className={cn(
-          "w-full bg-surface-grey/80 text-white placeholder:text-metadata-grey",
-          "pl-11 pr-10 py-2.5 md:py-3 rounded-full border border-surface-grey/50",
-          "focus:border-electric-cyan focus:ring-2 focus:ring-electric-cyan/30 focus:outline-none",
-          "transition-all duration-200 shadow-sm text-sm md:text-base",
+          "w-full bg-zinc-900/50 text-white placeholder:text-zinc-500",
+          "pl-11 pr-10 py-2.5 rounded-full border border-white/10",
+          "focus:border-electric-cyan/50 focus:ring-4 focus:ring-electric-cyan/10 focus:outline-none",
+          "transition-all duration-200 text-sm md:text-base",
           inputClassName
         )}
-        role="combobox"
-        aria-expanded={isOpen}
-        aria-autocomplete="list"
-        aria-controls={listboxId}
-        aria-activedescendant={
-          highlightedIndex >= 0 ? `suggestion-${highlightedIndex}` : undefined
-        }
-        aria-label="Search movies, moods, or people"
       />
 
       {showClearButton && inputValue && (
@@ -145,44 +136,53 @@ export default function SearchCombobox({
           type="button"
           onClick={() => {
             setInputValue("");
+            setQuery("");
             inputRef.current?.focus();
           }}
-          className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors"
-          aria-label="Clear search input">
-          <X size={18} />
+          className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition-colors">
+          <X size={16} />
         </button>
       )}
 
-      {/* Dropdown */}
-      {isOpen && results.length > 0 && (
+      {/* Dropdown Results */}
+      {isOpen && (
         <div
           ref={dropdownRef}
-          id={listboxId}
-          role="listbox"
-          aria-label="Search suggestions"
-          className="absolute mt-2 w-full bg-zinc-900 rounded-xl shadow-2xl border border-white/10 max-h-80 overflow-y-auto z-50">
-          {results.slice(0, 8).map((movie, index) => (
-            <div
-              key={movie.id}
-              id={`suggestion-${index}`}
-              role="option"
-              aria-selected={highlightedIndex === index}
-              className={cn(
-                "px-4 py-3 cursor-pointer text-sm transition-colors duration-150",
-                highlightedIndex === index
-                  ? "bg-zinc-700 text-white"
-                  : "hover:bg-zinc-800 text-zinc-200"
-              )}
-              onMouseEnter={() => setHighlightedIndex(index)}
-              onClick={() => handleSuggestionClick(movie)}>
-              <span className="font-medium">{movie.title}</span>
-              {movie.release_date && (
-                <span className="ml-2 text-xs text-zinc-500">
-                  ({new Date(movie.release_date).getFullYear()})
-                </span>
-              )}
+          className="absolute mt-2 w-full bg-zinc-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 max-h-80 overflow-y-auto z-50 py-2 animate-in fade-in zoom-in-95 duration-200">
+          {results.length > 0 ? (
+            results.slice(0, 8).map((movie, index) => (
+              <div
+                key={movie.id}
+                className={cn(
+                  "px-4 py-3 cursor-pointer flex items-center justify-between transition-colors",
+                  highlightedIndex === index
+                    ? "bg-white/10 text-white"
+                    : "text-zinc-300 hover:bg-white/5"
+                )}
+                onMouseEnter={() => setHighlightedIndex(index)}
+                onClick={() => commitSearch(movie.title)}>
+                <div className="flex flex-col">
+                  <span className="font-medium line-clamp-1">
+                    {movie.title}
+                  </span>
+                  <span className="text-xs text-zinc-500">
+                    {movie.release_date
+                      ? new Date(movie.release_date).getFullYear()
+                      : "N/A"}
+                  </span>
+                </div>
+                {movie.vote_average > 0 && (
+                  <span className="text-[10px] font-bold bg-zinc-800 px-1.5 py-0.5 rounded text-electric-cyan">
+                    {movie.vote_average.toFixed(1)}
+                  </span>
+                )}
+              </div>
+            ))
+          ) : !isLoading && inputValue.length > 2 ? (
+            <div className="px-4 py-6 text-center text-zinc-500 text-sm">
+              No movies found for &quot;{inputValue}&quot;
             </div>
-          ))}
+          ) : null}
         </div>
       )}
     </div>

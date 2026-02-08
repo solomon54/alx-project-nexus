@@ -8,13 +8,15 @@ interface ResultsGridProps {
   onDismiss?: (id: number) => void;
 }
 
+// src/components/explore/ResultsGrid.tsx
+
 export default function ResultsGrid({
   movies,
   onDismiss,
   onWatchlistToggle,
 }: ResultsGridProps) {
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-3">
       {movies.length === 0 ? (
         <p className="col-span-full text-center text-metadata-grey py-12">
           No movies match your filters yet.

@@ -1,7 +1,6 @@
-// src/components/movie/MovieDetailsSection.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Movie, Provider } from "@/types/movie";
 import { MovieHero } from "./MovieHero";
 import { MovieActions } from "./MovieActions";
@@ -11,6 +10,7 @@ import { cn } from "@/utils/classNames";
 import { Star } from "lucide-react";
 
 import { memoryStore } from "@/features/memory/memory.store";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const MovieDetailsSection = ({
   movie,
@@ -19,9 +19,15 @@ export const MovieDetailsSection = ({
   movie: Movie;
   providers: Provider[];
 }) => {
+  const { user } = useAuth();
   const [playing, setPlaying] = useState(false);
   const [, forceUpdate] = useState(0);
+
   const refresh = () => forceUpdate((v) => v + 1);
+
+  const uniqueMoods = useMemo(() => {
+    return Array.from(new Set(movie.moods || []));
+  }, [movie.moods]);
 
   const PROVIDER_FALLBACKS: Record<string, string> = {
     Netflix: "https://www.netflix.com",
@@ -33,36 +39,30 @@ export const MovieDetailsSection = ({
   const handleWatchNow = () => {
     const primary =
       providers.find((p) => p.monetization_type === "flatrate") ?? providers[0];
-
     if (!primary) return;
 
     const url = primary.deep_link || PROVIDER_FALLBACKS[primary.provider_name];
-
-    if (url) {
-      window.open(url, "_blank", "noopener,noreferrer");
-    }
+    if (url) window.open(url, "_blank", "noopener,noreferrer");
   };
 
   const handleAddToWatchlist = () => {
-    memoryStore.addToWatchlist(movie.id);
+    // Pass user?.id to trigger cloud sync only when logged in
+    memoryStore.addToWatchlist(movie.id, user?.id);
     refresh();
   };
 
   const handleDismiss = () => {
-    memoryStore.dismissMovie(movie.id);
+    memoryStore.removeFromWatchlist(movie.id, user?.id);
     refresh();
   };
 
-  const handleRateVibe = () => {
-    console.log("Rate vibe (coming next)");
-  };
+  const handleRateVibe = () => console.log("Rate vibe (coming next)");
 
   return (
     <div className="bg-cinema-black text-white min-h-screen">
-      {/* Hero / Player Area */}
       <div
         className={cn(
-          "relative w-full",
+          "relative w-full transition-all duration-500",
           playing ? "h-[55vh] sm:h-[65vh] md:h-[75vh]" : "h-[70vh] md:h-[85vh]"
         )}>
         <MovieHero
@@ -73,7 +73,6 @@ export const MovieDetailsSection = ({
         />
       </div>
 
-      {/* Content  */}
       <div className="relative z-10">
         {playing ? (
           <div className="px-5 sm:px-8 md:px-12 lg:px-16 pt-6 pb-16 max-w-6xl mx-auto">
@@ -98,7 +97,6 @@ export const MovieDetailsSection = ({
               </div>
             </div>
 
-            {/* Actions row */}
             <MovieActions
               providers={providers}
               onWatchNow={handleWatchNow}
@@ -109,16 +107,15 @@ export const MovieDetailsSection = ({
               isDismissed={memoryStore.isDismissed(movie.id)}
             />
 
-            {/* Overview + moods */}
             <p className="mt-6 text-base md:text-lg leading-relaxed text-zinc-300 max-w-3xl">
               {movie.overview}
             </p>
 
             <div className="flex flex-wrap gap-2.5 mt-5">
-              {movie.moods?.map((tag) => (
+              {uniqueMoods.map((tag, idx) => (
                 <span
-                  key={tag}
-                  className="inline-flex items-center px-3.5 py-1.5 bg-zinc-800/70 text-zinc-200 text-sm rounded-full border border-zinc-700/50">
+                  key={`${tag}-${idx}`}
+                  className="px-3.5 py-1.5 bg-zinc-800/70 text-zinc-200 text-sm rounded-full border border-zinc-700/50">
                   {tag}
                 </span>
               ))}
@@ -128,7 +125,6 @@ export const MovieDetailsSection = ({
           <div className="px-5 sm:px-8 md:px-12 lg:px-16 -mt-40 md:-mt-64 pb-16 max-w-6xl mx-auto">
             <div className="bg-linear-to-t from-cinema-black via-cinema-black/80 to-transparent rounded-t-2xl p-6 md:p-10 pt-16 md:pt-24 backdrop-blur-md border-t border-white/5">
               <MovieMeta movie={movie} />
-
               <div className="mt-8 md:mt-10">
                 <MovieActions
                   providers={providers}
@@ -144,7 +140,6 @@ export const MovieDetailsSection = ({
           </div>
         )}
 
-        {/* Extras */}
         <div className="px-5 sm:px-8 md:px-12 lg:px-16 pb-24 pt-8 md:pt-12 max-w-7xl mx-auto border-t border-zinc-800/50">
           <MovieExtras
             movie={movie}

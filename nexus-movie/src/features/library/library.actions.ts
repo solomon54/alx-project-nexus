@@ -1,4 +1,4 @@
-//src/features/library/library.actions.ts
+// src/features/library/library.actions.ts
 import { supabase } from "@/lib/supabase";
 import { MovieId, DiscoveryMood } from "../memory/memory.types";
 
@@ -7,27 +7,34 @@ export async function syncMemoryToCloud(
   watchlist: MovieId[],
   dismissed: MovieId[]
 ) {
+  const syncs = [];
+
   if (watchlist.length > 0) {
     const watchlistData = watchlist.map((id) => ({
       user_id: userId,
       movie_id: id,
     }));
-    await supabase
-      .from("watchlist")
-      .upsert(watchlistData, { onConflict: "user_id,movie_id" });
+    syncs.push(
+      supabase
+        .from("watchlist")
+        .upsert(watchlistData, { onConflict: "user_id,movie_id" })
+    );
   }
+
   if (dismissed.length > 0) {
     const dismissedData = dismissed.map((id) => ({
       user_id: userId,
       movie_id: id,
     }));
-    await supabase
-      .from("dismissed")
-      .upsert(dismissedData, { onConflict: "user_id,movie_id" });
+    syncs.push(
+      supabase
+        .from("dismissed")
+        .upsert(dismissedData, { onConflict: "user_id,movie_id" })
+    );
   }
-}
 
-//Fetches everything from cloud to populate local state on login
+  await Promise.all(syncs);
+}
 
 export async function fetchUserLibrary(userId: string) {
   const [wl, ds, pr] = await Promise.all([
@@ -49,29 +56,44 @@ export async function fetchUserLibrary(userId: string) {
 
 export const cloudLibrary = {
   async addToWatchlist(userId: string, movieId: MovieId) {
+    //  Explicitly upsert to watchlist
     await supabase
       .from("watchlist")
-      .upsert({ user_id: userId, movie_id: movieId });
+      .upsert(
+        { user_id: userId, movie_id: movieId },
+        { onConflict: "user_id,movie_id" }
+      );
+
+    //  Clean up from the other table to prevent logical conflicts
     await supabase
       .from("dismissed")
       .delete()
       .match({ user_id: userId, movie_id: movieId });
   },
+
   async dismissMovie(userId: string, movieId: MovieId) {
+    //  Explicitly upsert to dismissed
     await supabase
       .from("dismissed")
-      .upsert({ user_id: userId, movie_id: movieId });
+      .upsert(
+        { user_id: userId, movie_id: movieId },
+        { onConflict: "user_id,movie_id" }
+      );
+
+    //  Clean up from watchlist
     await supabase
       .from("watchlist")
       .delete()
       .match({ user_id: userId, movie_id: movieId });
   },
+
   async removeFromWatchlist(userId: string, movieId: MovieId) {
     await supabase
       .from("watchlist")
       .delete()
       .match({ user_id: userId, movie_id: movieId });
   },
+
   async updatePreferences(
     userId: string,
     mood?: DiscoveryMood,

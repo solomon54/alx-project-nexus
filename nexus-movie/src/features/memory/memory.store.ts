@@ -43,29 +43,56 @@ class MemoryStore {
 
   async addToWatchlist(id: MovieId, userId?: string) {
     this.state.watchlist.add(id);
-    this.state.dismissed.delete(id);
+    this.state.dismissed.delete(id); // Can't be both
     this.persist();
-    if (userId) await cloudLibrary.addToWatchlist(userId, id);
+
+    if (userId && userId !== "undefined") {
+      try {
+        await cloudLibrary.addToWatchlist(userId, id);
+      } catch (err) {
+        console.error("Cloud sync failed:", err);
+      }
+    }
   }
 
   async dismissMovie(id: MovieId, userId?: string) {
     this.state.dismissed.add(id);
     this.state.watchlist.delete(id);
     this.persist();
-    if (userId) await cloudLibrary.dismissMovie(userId, id);
+
+    if (userId && userId !== "undefined") {
+      try {
+        await cloudLibrary.dismissMovie(userId, id);
+      } catch (err) {
+        console.error("Cloud dismiss failed:", err);
+      }
+    }
   }
 
   async removeFromWatchlist(id: MovieId, userId?: string) {
     this.state.watchlist.delete(id);
     this.persist();
-    if (userId) await cloudLibrary.removeFromWatchlist(userId, id);
+
+    if (userId && userId !== "undefined") {
+      try {
+        await cloudLibrary.removeFromWatchlist(userId, id);
+      } catch (err) {
+        console.error("Cloud removal failed:", err);
+      }
+    }
   }
 
   async setMood(mood: DiscoveryMood, userId?: string) {
     this.state.mood = mood;
     this.persist();
-    if (userId)
-      await cloudLibrary.updatePreferences(userId, mood, this.state.genres);
+
+    if (userId && userId !== "undefined") {
+      try {
+        await cloudLibrary.updatePreferences(userId, mood, this.state.genres);
+      } catch (err) {
+        console.error("Mood sync failed:", err);
+      }
+    }
   }
 
   async setGenres(genres: string[], userId?: string) {

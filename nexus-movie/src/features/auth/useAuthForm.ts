@@ -59,12 +59,12 @@ export const useAuthForm = (mode: AuthMode) => {
         await signIn(email, password);
       }
 
-      // Redirect Logic: Check session storage for intended destination
+      // Redirect Logic: Check session
       const redirectTo = sessionStorage.getItem("redirectTo") || "/library";
       sessionStorage.removeItem("redirectTo");
-      window.location.href = redirectTo; // Force full load to refresh auth state
+      window.location.href = redirectTo;
+      state;
     } catch (err: any) {
-      // Handle Supabase specific errors inline
       const msg = err.message.toLowerCase();
       if (msg.includes("email already") || msg.includes("registered")) {
         setErrors({ email: "This email is already taken." });

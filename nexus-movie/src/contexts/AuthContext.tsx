@@ -73,7 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsGuest(false);
         // MERGE logic: Transfers guest watchlists to the DB/Store
         const guestState = memoryStore.getState();
-        memoryStore.mergeGuestMemory(guestState);
+        memoryStore.mergeGuestMemory(guestState, currentUser.id);
       }
 
       setIsLoading(false);
