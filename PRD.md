@@ -1,5 +1,12 @@
 # PRD: Dynamic Movie Discovery & Recommendation Platform
 
+## 📖 Documentation Hub
+
+> To understand the full scope of the Nexus platform, please refer to the following specialized documents:
+
+- [🚀 Product Requirements Document (PRD)](./PRD.md) – _All About Problem Statement, Goals, and User Pain Points.._(See below)
+- [💻 Technical Architecture](./README.md) – _Deep dive into the Technical details, Folder structure, Tech stack, and Installation.._
+
 ![Home Page](./PWAHomeDashboard.png)
 
 ### 1. Problem Statement
@@ -226,7 +233,7 @@ To ensure the stability of the MVP, the engineering team must account for these 
    - **Risk:** The SQL query/Database request becomes too complex or the character limit of the URL query string is exceeded.
    - **Requirement:** Set a **maximum limit for active tags** (e.g., max 10) and ensure the backend uses an efficient `WHERE IN` or `JOIN` strategy to prevent a timeout when processing highly complex intersections.
 
-### Senior PM Notes for the Lead Dev
+### 💡 Pro Tips
 
 - **Keep it Outcome-Focused:** In the "Key Features" section, focus on the user value rather than the specific tech stack (e.g., "Real-time preference updates" instead of "WebSocket implementation").
 - **Prioritize Ruthlessly:** Use the "Priority" field in the Epics section to distinguish between what is "Must-Have" (P0) for launch and what can wait for V2.
