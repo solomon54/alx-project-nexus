@@ -6,6 +6,8 @@
 
 - [🚀 Product Requirements Document (PRD)](./README.md) – _All About Problem Statement, Goals, and User Pain Points.._(See below)
 - [💻 Technical Architecture](./nexus-movie/README.md) – _Deep dive into the Technical details, Folder structure, Tech stack, and Installation.._
+- [🎥 Live Demo Video](https://drive.google.com/file/d/1rtXNqGDAcKXdF6J-x5pCIXcI8ML3U8_G/view?usp=sharing) – _End-to-end walkthrough of the platform features._
+- [🌎 Project Live Here](https://project-nexus-blue.vercel.app) – _Explore the live Nexus platform and core user experience._
 
 ![Home Page](./PWAHomeDashboard.png)
 
