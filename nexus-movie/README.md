@@ -53,7 +53,7 @@ Users can explore freely as guests and upgrade seamlessly — without losing dat
 
 **Goal:** Advanced discovery using mood, genre, and year filters.
 
-![Search & Explore](./src/public/Screen/SearchExplore-desk.png)
+![Search & Explore](./public/screens/SearchExplore-desk.png)
 
 **Features:**
 
@@ -66,9 +66,9 @@ Users can explore freely as guests and upgrade seamlessly — without losing dat
 
 **Goal:** Act as a **single source of truth** for each movie.
 
-![Movie Details](./src/public/Screen/MovieDetailPage-desk.png)
+![Movie Details](./public/screens/MovieDetailPage-desk.png)
 
-![Movie Details](./src/public/Screen/MovieDetailPage-mob.png)
+![Movie Details](./public/screens/MovieDetailPage-mob.png)
 
 **Features:**
 
@@ -83,7 +83,7 @@ Users can explore freely as guests and upgrade seamlessly — without losing dat
 
 **Goal:** Personal movie curation space.
 
-![My Library](./src/public/Screen/MyLibrary-desk.png)
+![My Library](./public/screens/MyLibrary-desk.png)
 
 **Features:**
 
@@ -97,7 +97,7 @@ Users can explore freely as guests and upgrade seamlessly — without losing dat
 
 **Goal:** Prime the recommendation engine.
 
-![Onboarding – Vibe Picker](./src/public/Screen/OnboardingVibePicker-desk.png)
+![Onboarding – Vibe Picker](./public/screens/OnboardingVibePicker-desk.png)
 
 **Features:**
 
@@ -111,9 +111,9 @@ Users can explore freely as guests and upgrade seamlessly — without losing dat
 
 **Goal:** User control and transparency.
 
-![ Profile & Settings](./src/public/Screen/ProfileSettings-desk.png)
+![ Profile & Settings](./public/screens/ProfileSettings-desk.png)
 
-![ Profile & Settings](./src/public/Screen/ProfileSettings-mob.png)
+![ Profile & Settings](./public/screens/ProfileSettings-mob.png)
 
 **Features:**
 
@@ -127,9 +127,9 @@ Users can explore freely as guests and upgrade seamlessly — without losing dat
 
 **Goal:** Seamless conversion from guest to member.
 
-![ Profile & Settings](./src/public/Screen/SignUpGateway-desk.png)
+![ Profile & Settings](./public/screens/SignUpGateway-desk.png)
 
-![ Profile & Settings](./src/public/Screen/CinemaGateway-desk.png)
+![ Profile & Settings](./public/screens/CinemaGateway-desk.png)
 
 **Features:**
 
